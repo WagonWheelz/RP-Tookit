@@ -39,14 +39,14 @@ const render = () => {
   ctx.shadowColor = 'rgb(0,0,0)';
   ctx.shadowBlur = 4;
 
-  ctx.font = '60px Source Sans Pro';
+  ctx.font = 'italic 700 60px Source Sans Pro';
   ctx.fillText(inputs.fullname.value.toUpperCase().trim(), 700, 130);
-  ctx.font = '46px Source Sans Pro';
+  ctx.font = 'italic 700 46px Source Sans Pro';
   ctx.fillText(inputs.badge.value.toUpperCase().trim(), 700, 190);
   ctx.shadowOffsetY = 3;
   ctx.shadowOffsetx = 3;
   ctx.shadowBlur = 1;
-  ctx.font = '34px Source Sans Pro';
+  ctx.font = 'italic 700 34px Source Sans Pro';
   ctx.fontWeight = 'bold';
   ctx.fillText(inputs.line1.value.toUpperCase().trim(), 700, 260);
   ctx.fillText(inputs.line2.value.toUpperCase().trim(), 700, 310);

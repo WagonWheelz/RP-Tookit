@@ -47,7 +47,7 @@ const render = () => {
     ctx.shadowBlur = 4;
 
     // --- NAME ---
-    ctx.font = '46px Source Sans Pro';
+    ctx.font = 'italic 700 46px Source Sans Pro';
     ctx.textAlign = 'left';
     // X=330, Y=153 (Preserved)
     ctx.fillText(inputs.fullname.value.toUpperCase().trim(), 330, 153);
@@ -57,18 +57,18 @@ const render = () => {
     ctx.shadowBlur = 1;
 
     // --- RANK (Text Input) ---
-    ctx.font = '40px Source Sans Pro';
+    ctx.font = 'italic 700 40px Source Sans Pro';
     ctx.textAlign = 'left';
     // X=330, Y=195 (Preserved)
     ctx.fillText(inputs.rank.value.toUpperCase().trim(), 330, 195);
 
     // --- DIVISIONS ---
-    ctx.font = '30px Source Sans Pro';
+    ctx.font = 'italic 700 30px Source Sans Pro';
     ctx.textAlign = 'left';
     // X=330, Y=233 (Preserved)
     ctx.fillText(inputs.line1.value.toUpperCase().trim(), 330, 233);
 
-    ctx.font = '30px Source Sans Pro';
+    ctx.font = 'italic 700 30px Source Sans Pro';
     ctx.textAlign = 'left';
     // X=330, Y=263 (Preserved)
     ctx.fillText(inputs.line2.value.toUpperCase().trim(), 330, 263);
