@@ -143,7 +143,7 @@
                         <input type="text" id="fAgency" value="SHERIFFS DEPARTMENT" spellcheck="false">
                     </div>
                     <div class="field">
-                        <label>Icon (optional, replaces the AXON logo)</label>
+                        <label>Icon (optional, replaces the default logo)</label>
                         <input type="file" id="fIcon" accept="image/*">
                         <span class="hint">Square PNG with transparency works best.</span>
                     </div>
@@ -153,8 +153,8 @@
                 <div class="preview-box">
                     <div class="placeholder" id="ph">Loading preview&hellip;</div>
                     <div class="bcam" id="bcam">
-                        <div class="logo-row" id="bcamLogo"><img id="bcamImg" alt="logo"></div>
-                        <div class="rec">REC&nbsp;<span class="dot">&bull;</span>&nbsp;&nbsp;AXON&nbsp;BODYCAM&trade;</div>
+                        <div class="logo-row" id="bcamLogo" style="display:none"><img id="bcamImg" alt="logo"></div>
+                        <div class="rec">REC&nbsp;<span class="dot">&bull;</span>&nbsp;&nbsp;XION&nbsp;BODYCAM</div>
                         <div><span id="bcamPlayer">M. MAX</span> <span id="bcamCallsign">[214]</span></div>
                         <div id="bcamAgency">SHERIFFS DEPARTMENT</div>
                         <div><span id="bcamDate"></span> <span id="bcamTime"></span></div>
@@ -203,7 +203,7 @@
             const DEFAULT_LOGO = null; // filled from template fetch below
             let iconData = null;        // user-uploaded icon as data URL
             let templateHtml = '';      // top-right.html source, fetched once
-            let logoDataUrl = '';       // AXON logo data url extracted from template
+            let logoImage = new Image(); // logo drawn on the canvas (set when an icon is uploaded)
 
             const fPlayer = $('fPlayer'), fCallsign = $('fCallsign'), fAgency = $('fAgency'), fIcon = $('fIcon');
             const bcam = $('bcam'), bcamImg = $('bcamImg'), bcamLogo = $('bcamLogo');
@@ -236,12 +236,14 @@
             // icon upload
             fIcon.addEventListener('change', () => {
                 const file = fIcon.files[0];
-                if (!file) { iconData = null; bcamImg.removeAttribute('src'); bcamLogo.style.display = 'none'; return; }
+                if (!file) { iconData = null; bcamImg.removeAttribute('src'); bcamLogo.style.display = 'none'; logoImage = new Image(); return; }
                 const r = new FileReader();
                 r.onload = () => {
                     iconData = r.result;
                     bcamImg.src = iconData;
                     bcamLogo.style.display = 'block';
+                    logoImage = new Image();
+                    logoImage.src = iconData;
                 };
                 r.readAsDataURL(file);
             });
@@ -251,14 +253,6 @@
                 .then(r => r.text())
                 .then(t => {
                     templateHtml = t;
-                    const m = t.match(/src="(data:image\/png;base64,[^"]+)"/);
-                    if (m) {
-                        logoDataUrl = m[1];
-                        bcamImg.src = logoDataUrl;
-                        bcamLogo.style.display = 'block';
-                    } else {
-                        bcamLogo.style.display = 'none';
-                    }
                     refreshPreview();
                 })
                 .catch(() => { refreshPreview(); });
@@ -277,7 +271,9 @@
                 out = out.replace(/const agency = "[^"]*";/, 'const agency = "' + escJs(fAgency.value || 'AGENCY') + '";');
                 out = out.replace(/const callsign = "[^"]*";/, 'const callsign = "' + escJs(fCallsign.value || '[000]') + '";');
                 if (iconData) {
-                    out = out.replace(/src="data:image\/png;base64,[^"]*"/, 'src="' + iconData + '"');
+                    out = out.replace('<!--LOGO-->', '<img src="' + iconData + '" width="64" height="64" border="0" alt="logo">');
+                } else {
+                    out = out.replace('<!--LOGO-->', '');
                 }
                 // drop the 21MB beep audio so the single downloaded file works standalone
                 out = out.replace(/<audio[\s\S]*?<\/audio>/, '<!-- beep audio omitted; add double-beep.wav back if you want sound -->');
@@ -321,37 +317,45 @@
             function drawOverlayOn(c, W, H, t) {
                 const pad = Math.max(10, W * 0.02);
                 const boxW = Math.min(W * 0.32, 420);
-                const boxH = boxW * 0.42;
+                const boxH = boxW * 0.5;
                 const x = W - boxW - pad, y = pad;
 
                 c.save();
                 c.fillStyle = 'rgba(0,0,0,0.55)';
                 roundRect(c, x, y, boxW, boxH, 10); c.fill();
 
+                // logo (top-left) if an icon was uploaded
+                if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
+                    const lh = boxH * 0.15;
+                    const lw = lh * (logoImage.naturalWidth / logoImage.naturalHeight);
+                    c.drawImage(logoImage, x + boxW * 0.05, y + boxH * 0.06, lw, lh);
+                }
+
+                const ty = y + boxH * 0.16;
                 c.textBaseline = 'alphabetic';
                 c.font = '600 ' + (boxW*0.052) + 'px "Share Tech Mono", monospace';
-                // REC + AXON line
+                // REC + XION line
                 if ((Math.floor(t/600) % 2) === 0) {
                     c.fillStyle = '#ff2d2d';
-                    c.beginPath(); c.arc(x + boxW*0.06, y + boxH*0.16, boxW*0.02, 0, Math.PI*2); c.fill();
+                    c.beginPath(); c.arc(x + boxW*0.06, ty + boxH*0.12, boxW*0.018, 0, Math.PI*2); c.fill();
                 }
                 c.fillStyle = '#e8e8e8';
-                c.fillText('REC   AXON BODYCAM', x + boxW*0.10, y + boxH*0.20);
+                c.fillText('REC   XION BODYCAM', x + boxW*0.10, ty + boxH*0.18);
                 // player + callsign
-                c.fillText(fPlayer.value, x + boxW*0.05, y + boxH*0.42);
+                c.fillText(fPlayer.value, x + boxW*0.05, ty + boxH*0.36);
                 c.textAlign = 'right';
-                c.fillText(fCallsign.value, x + boxW*0.95, y + boxH*0.42);
+                c.fillText(fCallsign.value, x + boxW*0.95, ty + boxH*0.36);
                 c.textAlign = 'left';
                 // agency
                 c.fillStyle = '#bdbdbd';
                 c.font = (boxW*0.045) + 'px "Share Tech Mono", monospace';
-                c.fillText(fAgency.value, x + boxW*0.05, y + boxH*0.62);
+                c.fillText(fAgency.value, x + boxW*0.05, ty + boxH*0.54);
                 // date / time
                 const now = new Date();
                 const mm = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
                 const ds = ('0'+now.getDate()).slice(-2) + '-' + mm[now.getMonth()] + '-' + now.getFullYear();
                 const ts = now.toLocaleTimeString('en-GB', {hour12:false});
-                c.fillText(ds + '  ' + ts, x + boxW*0.05, y + boxH*0.82);
+                c.fillText(ds + '  ' + ts, x + boxW*0.05, ty + boxH*0.72);
                 c.restore();
             }
 
