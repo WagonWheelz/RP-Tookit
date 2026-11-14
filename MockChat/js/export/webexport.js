@@ -558,7 +558,14 @@
   async function pageVideo(opts, emit) {
     cancelled = false;
     if (typeof window.VideoEncoder !== 'function') {
-      return { ok: false, error: 'Video export needs Chrome or Edge. PNG works in every browser.' };
+      // Two quite different causes. The common one is not the browser at all:
+      // WebCodecs is only exposed in a secure context, so the same page that
+      // exports video on https:// exports nothing on http://192.168.x.x.
+      if (!window.isSecureContext) {
+        return { ok: false, error: 'Video export needs a secure page — open this over https:// or on localhost. ' +
+          'This page is ' + location.origin + ' (plain http), where the browser hides its video encoder. PNG still works.' };
+      }
+      return { ok: false, error: 'This browser has no video encoder (WebCodecs). Chrome or Edge 94+ can do it; PNG works everywhere.' };
     }
     if (!window.Mp4Muxer) return { ok: false, error: 'The MP4 muxer did not load — reload the page.' };
 
