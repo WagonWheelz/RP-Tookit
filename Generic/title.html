@@ -41,7 +41,7 @@
                     <input id="titleColour" type="color" value="#facc15">
                 </div>
                 <div class="bg-field">
-                    <label for="bgFile">Background image (1920x65)</label>
+                    <label for="bgFile">Background image (must be 1920x65)</label>
                     <input id="bgFile" type="file" accept="image/png,image/jpeg">
                 </div>
                 <div class="bg-field">
@@ -50,6 +50,7 @@
                 </div>
             </div>
 
+            <p class="bg-hint">Custom backgrounds must be exactly <strong>1920x65 px</strong> (the size of a title bar), PNG or JPEG. Anything else is rejected and the background you already have stays in place. Leave the picker empty and the bar is drawn as a gradient from the colour above.</p>
             <p id="bgMsg" class="bg-msg">Using the colour gradient.</p>
         </div>
     </main>
