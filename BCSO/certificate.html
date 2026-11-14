@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blaine County Sheriff's Office</title>
+  <link rel="icon" href="./images/favicon.png" type="image">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div style="font-family: 'Carlito'; opacity: 0; height: 0; width: 0;">.</div>
+
+  <div class="overlay">
+    <header class="topbar">
+      <div class="wrap topbar-main">
+        <span class="mark">BCSO</span>
+        <span class="brand-name">Blaine County Sheriff's Office</span>
+        <span class="spacer"></span>
+        <a class="home" href="../index.html">Back to toolkit</a>
+      </div>
+      <nav class="wrap nav-links" aria-label="Creators">
+            <a class="nav-link" href="./bcso.html">Overview</a>
+            <a class="nav-link" href="./title.html">Title</a>
+            <a class="nav-link" href="./signature.html">Signature</a>
+            <a class="nav-link" href="./header.html">Header</a>
+            <a class="nav-link active" href="./certificate.html">Certificate</a></nav>
+    </header>
+
+    <div class="container pb-5">
+
+      <div class="row justify-content-center my-4">
+        <div class="col-md-12 text-center">
+            <canvas class="canvas" style="max-height: 70vh; width: auto; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: white;"></canvas>
+            <img class="canvas-image" src="./images/certificate.png" alt="" style="display:none;">
+        </div>
+      </div>
+ 
+      <form class="inputs mb-4 form-group d-flex justify-content-center align-content-center flex-column text-sm-left">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label>Recipient Name</label>
+            <input type="text" class="form-control" name='fullname' placeholder="John Doe" spellcheck="false">
+          </div>
+          <div class="col-md-6">
+            <label>Course / Award Title</label>
+            <input type="text" class="form-control" name='course' placeholder="Basic Life Support" spellcheck="false">
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <label>Authorized Signature</label>
+            <input type="text" class="form-control" name='signature' placeholder="Jane Smith" style="text-transform: none;" spellcheck="false">
+          </div>
+           <div class="col-md-6">
+            <label>Date Issued</label>
+            <input type="text" class="form-control" name='date' placeholder="OCT 25, 2025" spellcheck="false">
+          </div>
+        </div>
+      </form>
+
+      <div class="row justify-content-center">
+        <div class="col-md-12 text-center">
+            <h4 class="text-white mb-3" style="text-shadow: 1px 1px 2px black;">Select Background</h4>
+            
+            <button class="btn btn-gradient btn-outline-dark text-truncate" id="btn-bg-1">Individual Certificate</button>
+            <button class="btn btn-gradient btn-outline-dark text-truncate" id="btn-bg-2">Business Certificate</button>
+            
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="./js/certificate.js"></script>
+  </body>
+</html>

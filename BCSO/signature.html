@@ -1,0 +1,77 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blaine County Sheriff's Office</title>
+  <link rel="icon" href="./images/favicon.png" type="image">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div class="overlay">
+    <header class="topbar">
+      <div class="wrap topbar-main">
+        <span class="mark">BCSO</span>
+        <span class="brand-name">Blaine County Sheriff's Office</span>
+        <span class="spacer"></span>
+        <a class="home" href="../index.html">Back to toolkit</a>
+      </div>
+      <nav class="wrap nav-links" aria-label="Creators">
+            <a class="nav-link" href="./bcso.html">Overview</a>
+            <a class="nav-link" href="./title.html">Title</a>
+            <a class="nav-link active" href="./signature.html">Signature</a>
+            <a class="nav-link" href="./header.html">Header</a>
+            <a class="nav-link" href="./certificate.html">Certificate</a></nav>
+    </header>
+
+    <!-- Page Content -->
+    <div class="container ">
+      <!-- <section class="d-flex justify-content-around ranks-section"> -->
+      <div class="row justify-content-between mt-3 px-2 ranks">
+
+      </div>
+      <!-- </section> -->
+
+      <!-- Canvas -->
+      <div>
+        <canvas class="canvas my-5"></canvas>
+        <img class="canvas-image" src="./images/signature.png" alt="">
+      </div>
+ 
+      <!-- Inputs -->
+      <form class="inputs my-4 form-group d-flex justify-content-center align-content-center flex-column text-sm-left">
+        <div class="row">
+          <div class="col-6 ">
+            <label>Name</label>
+            <input type="text" class="form-control" name='fullname' spellcheck="false">
+          </div>
+          <div class="col-6">
+            <label>Badge Number</label>
+            <input type="text" class="form-control" name='badge' spellcheck="false">
+          </div>
+          <div class="col-6 ">
+            <label>Rank</label>
+            <input type="text" class="form-control" name='rank' spellcheck="false">
+          </div>
+          <div class="col-6">
+            <label>Callsign</label>
+            <input type="text" class="form-control" name='callsign' spellcheck="false">
+          </div>
+        </div>
+        <label>Divisions/Office</label>
+        <input type="text" class="form-control" name='line1' spellcheck="false">
+        <label>Divisions/Office</label>
+        <input type="text" class="form-control" name="line2" spellcheck="false">
+      </form>
+
+    </div>
+  </div>
+
+
+  <script src="./js/signature.js"></script>
+  </body>
+
+</html>
