@@ -2,6 +2,8 @@
 
 
 @font-face { font-family: 'BTBrikRegular'; src: url('./fonts/BTBrikRegular.otf'); font-weight: normal; font-style: normal; }
+@font-face { font-family: 'Carlito'; src: url('./fonts/Carlito-Regular.ttf'); font-weight: normal; font-style: normal; }
+@font-face { font-family: 'Carlito'; src: url('./fonts/Carlito-Bold.ttf'); font-weight: bold; font-style: normal; }
 
 /* Generic faction — same flat theme as the other hubs, accent is the
    generic yellow. Users pick their own colours on top of this later. */
