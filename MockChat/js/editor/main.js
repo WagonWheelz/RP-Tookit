@@ -38,8 +38,8 @@
   // does is remember the choice (first visit: follow the device).
   const appTheme = $('#appTheme');
   const savedTheme = E.pref.get('appTheme', null);
-  appTheme.checked = savedTheme ? savedTheme === 'night'
-    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Dark by default; a choice the user has made before still wins.
+  appTheme.checked = savedTheme ? savedTheme === 'night' : true;
   appTheme.addEventListener('change', () => E.pref.set('appTheme', appTheme.checked ? 'night' : 'day'));
 
   E.renderAll = function () {

@@ -446,7 +446,7 @@
       version: 1,
       meta: { name: 'Untitled mockup', created: Date.now() },
       platform,
-      theme: 'light',
+      theme: 'dark',
       timeline: {
         autoTiming: true,
         pace: 1,
