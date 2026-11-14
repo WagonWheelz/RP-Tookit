@@ -725,6 +725,9 @@
     // another tab, message or scene starts at the top
     const key = E.tab + '|' + E.selectedId + '|' + E.project.active;
     const same = host.dataset.key === key;
+    // the conversation column holds messages and steps, neither of which a
+    // watch page has
+    document.body.classList.toggle('yt-mode', !!(S.isYT && S.isYT(E.project.platform)));
     setHTML(host, (map[E.tab] || inspectorMessage)());
     host.dataset.key = key;
     if (same) host.scrollTop = keep;
@@ -736,11 +739,16 @@
       if (b.dataset.tab === 'chat') {
         b.textContent = S.isTT(E.project.platform) ? (E.project.platform === 'tiktoklive' ? 'Live' : 'Video') : 'Chat';
       }
-      // the watch-page panel only exists for a watch page
+      // A watch page has no messages, no bubbles and no timeline, so it shows
+      // one tab. Everything chat-shaped is hidden rather than dead.
+      const yt = !!(S.isYT && S.isYT(E.project.platform));
       if (b.dataset.tab === 'video') {
-        const on = !!(S.isYT && S.isYT(E.project.platform));
-        b.style.display = on ? '' : 'none';
-        if (!on && E.tab === 'video') E.tab = 'chat';
+        b.style.display = yt ? '' : 'none';
+        if (!yt && E.tab === 'video') E.tab = 'chat';
+      } else if (yt) {
+        b.style.display = 'none';
+      } else {
+        b.style.display = '';
       }
     });
   };

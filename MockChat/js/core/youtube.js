@@ -12,7 +12,13 @@
   'use strict';
 
   const src = (m) => (m && window.MediaRef) ? window.MediaRef.src(m) : '';
-  const isVideo = (m) => !!(m && (m.kind === 'video' || /^video\//.test((m.mime || '') + '')));
+  // Media refs carry an extension, not a mime type -- ask the store, which
+  // keeps the one list of what counts as a clip.
+  const isVideo = (m) => {
+    if (!m) return false;
+    if (window.Store && window.Store.isVideoMedia) return window.Store.isVideoMedia(m);
+    return ['mp4', 'webm', 'mov', 'mkv', 'm4v'].indexOf(String(m.ext || '').toLowerCase()) >= 0;
+  };
   const el = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -127,16 +133,37 @@
     const videoSrc = src(d.video);
 
     if (videoSrc && isVideo(d.video)) {
-      const v = el('video', 'yt-media');
-      v.src = videoSrc;
-      v.muted = true;
-      v.loop = true;
-      v.autoplay = true;
-      v.playsInline = true;
-      v.setAttribute('muted', '');
-      v.setAttribute('playsinline', '');
-      if (poster) v.poster = poster;
-      stage.appendChild(v);
+      // Draw the clip into a canvas instead of putting a <video> on the page.
+      // The exporter serialises this page into an SVG image, and a <video>
+      // paints as an empty box there -- which is why an exported PNG came out
+      // black. Pixels on a canvas survive the trip.
+      const canvas = el('canvas', 'yt-media');
+      canvas.width = 1640;
+      canvas.height = 922;
+      stage.appendChild(canvas);
+
+      const clip = el('video', 'yt-clip');
+      clip.src = videoSrc;
+      clip.muted = true;
+      clip.loop = true;
+      clip.autoplay = true;
+      clip.playsInline = true;
+      clip.setAttribute('muted', '');
+      clip.setAttribute('playsinline', '');
+      if (poster) clip.poster = poster;
+      stage.appendChild(clip);
+
+      const ctx = canvas.getContext ? canvas.getContext('2d') : null;
+      const paint = () => {
+        if (!ctx || !clip.videoWidth) return;
+        try { ctx.drawImage(clip, 0, 0, canvas.width, canvas.height); } catch (e) {}
+      };
+      ['loadeddata', 'seeked', 'playing', 'timeupdate'].forEach(ev2 => clip.addEventListener(ev2, paint));
+      // an interval, not requestAnimationFrame: a background tab (and the
+      // export's offscreen host) never fires animation frames
+      const timer = setInterval(paint, 120);
+      clip.addEventListener('emptied', () => clearInterval(timer));
+      paint();
     } else if (poster) {
       const img = el('img', 'yt-media');
       img.src = poster;
@@ -295,7 +322,9 @@
     main.appendChild(col);
     main.appendChild(side);
     page.appendChild(main);
-    return page.outerHTML;
+    // The element, not outerHTML: re-parsing the markup would rebuild every
+    // node and leave the video painter attached to an orphan copy.
+    return page;
   }
 
   window.YouTubeUI = { body, defaultYT, data };

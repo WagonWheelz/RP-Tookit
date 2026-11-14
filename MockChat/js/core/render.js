@@ -435,20 +435,25 @@
     // The watch page is a desktop document — its own chassis, built as markup
     // and laid out at a fixed 1280x720 then scaled to the project's canvas.
     if (window.Store.isYT(project.platform) && window.YouTubeUI) {
-      // innerHTML rather than setHTML: the module hands back a serialised DOM
-      // tree it built itself (every field went in via textContent), not an
-      // html`` template.
-      phone.innerHTML = window.YouTubeUI.body(project);
+      // appendChild, not innerHTML: the module hands back the element it built
+      // (every field went in via textContent), and re-parsing would orphan the
+      // video painter onto a detached copy.
+      phone.appendChild(window.YouTubeUI.body(project));
       const page = phone.querySelector('.yt-page');
       if (page) {
+        // the page is laid out at 1280x720 always; the canvas preset picks the
+        // scale, never the markup
         const k = (window.Store.screenW(c) || 1280) / 1280;
         page.style.transform = 'scale(' + k + ')';
-        page.style.width = '1280px';
-        page.style.height = '720px';
       }
       device.appendChild(phone);
       container.appendChild(device);
-      return { device, phone, scroll: page || phone, els: new Map(), gifts: null, youtube: true };
+      // NOT the page: the editor scrolls whatever this points at (auto-scroll
+      // to the newest message), and scrolling the page shoved its own content
+      // up by the overflow -- which is what clipped the masthead at the top.
+      // The phone is exactly the page's size, so there is nothing to scroll.
+      if (page) page.scrollTop = 0;
+      return { device, phone, scroll: phone, els: new Map(), gifts: null, youtube: true };
     }
 
     // TikTok screens are a full-bleed video with overlays, not a chat column,
