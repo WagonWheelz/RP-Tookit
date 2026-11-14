@@ -128,7 +128,7 @@ h4 { font-size: 1.05rem; margin: 0 0 12px; }
 .bg-controls { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: end; }
 .bg-field { display: flex; flex-direction: column; }
 .bg-field label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; margin-bottom: 8px; }
-input[type="color"] { width: 68px; height: 42px; padding: 2px; background: #ffffff; border: 1px solid var(--line); cursor: pointer; }
+input[type="color"] { width: 72px; height: 40px; padding: 2px; background: #ffffff; border: 1px solid var(--line); cursor: pointer; }
 input[type="file"] { color: var(--muted); font-size: 0.9rem; font-family: inherit; padding: 10px 0; }
 .bg-hint { color: var(--muted); font-size: 0.85rem; line-height: 1.55; margin: 18px 0 0; max-width: 72ch; }
 .bg-hint strong { color: var(--text); font-weight: 600; }

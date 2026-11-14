@@ -13,7 +13,7 @@
 
     <header class="topbar">
         <div class="wrap topbar-main">
-            <span class="mark">GENERIC</span>
+            <span class="mark">Generic</span>
             <span class="brand-name">Generic Faction</span>
             <span class="spacer"></span>
             <a class="home" href="../index.html">Back to toolkit</a>
@@ -26,13 +26,10 @@
         </nav>
     </header>
 
-    <main class="wrap">
-        <h1 class="page-title">Title creator</h1>
-        <p class="page-sub">Your own title bar: pick a colour for the gradient, or supply a 1920x65 image.</p>
+    <div class="container">
+        <canvas class="canvas my-5" aria-label="Title preview"></canvas>
 
-        <canvas class="canvas" aria-label="Title preview"></canvas>
-
-        <div class="inputs" style="margin-top: 32px;">
+        <div class="inputs mb-5">
 
             <label for="titleText">Title / separator</label>
             <input id="titleText" type="text" class="form-control" spellcheck="false" placeholder="YOUR FACTION">
@@ -55,7 +52,7 @@
             <p class="bg-hint">Custom backgrounds must be exactly <strong>1920x65 px</strong> (the size of a title bar), PNG or JPEG. Anything else is rejected and the background you already have stays in place. Leave the picker empty and the bar is drawn as a gradient from the colour above.</p>
             <p id="bgMsg" class="bg-msg">Using the colour gradient.</p>
         </div>
-    </main>
+    </div>
 
     <footer class="foot">
         <div class="wrap">
