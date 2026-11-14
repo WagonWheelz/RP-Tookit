@@ -84,7 +84,7 @@
   // A watch page has no steps, so the transport drives the clip in it: play and
   // pause, step a frame at a time, and a readout that follows the clip.
   const isPage = () => !!(S.isStatic && S.isStatic(E.project.platform));
-  const pageClip = () => document.querySelector('#preview video.yt-clip');
+  const pageClip = () => document.querySelector('#preview video.yt-clip, #preview video.ph-clip');
   const pageTotal = () => { const c = pageClip(); return (c && isFinite(c.duration) && c.duration > 0) ? c.duration : 0; };
   const pageAt = () => { const c = pageClip(); return c ? (c.currentTime || 0) : 0; };
   const fmtSec = (s, round) => {
@@ -95,7 +95,7 @@
     const c = pageClip();
     if (!c) return;
     try { c.currentTime = Math.max(0, Math.min(pageTotal() || 0, t)); } catch (e) {}
-    const pageEl = document.querySelector('#preview .yt-page');
+    const pageEl = document.querySelector('#preview .yt-page, #preview .ph-page');
     if (pageEl) pageEl.dispatchEvent(new CustomEvent('yt:seek', { bubbles: true, detail: { t: c.currentTime } }));
   };
 

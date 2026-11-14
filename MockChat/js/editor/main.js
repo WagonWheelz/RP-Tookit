@@ -88,8 +88,9 @@
   document.addEventListener('yt:seek', (e) => {
     const p = E.project;
     if (!p || !S.isStatic || !S.isStatic(p.platform)) return;
-    p.chat.yt = p.chat.yt || {};
-    p.chat.yt.at = Math.max(0, Number(e.detail && e.detail.t) || 0);
+    const key = (S.isPH && S.isPH(p.platform)) ? 'ph' : 'yt';
+    p.chat[key] = p.chat[key] || {};
+    p.chat[key].at = Math.max(0, Number(e.detail && e.detail.t) || 0);
     E.dirty = true;
     if (E.paintTransport) E.paintTransport();
   });
@@ -113,6 +114,16 @@
     if (/^msg\.anim\.(typing|delay)$/.test(path) && p.timeline.autoTiming) {
       const m = E.selected();
       if (m && !m.anim.manual) { m.anim.manual = true; setTimeout(E.renderInspector, 0); }
+    }
+
+    // tags are edited as one comma-separated line and stored as a list
+    if (path === 'chat.ph.tagsText') {
+      const list = String(v).split(',').map(t => t.trim()).filter(Boolean);
+      p.chat.ph = p.chat.ph || {};
+      p.chat.ph.tags = list.length ? list : ['tag one'];
+      E.dirty = true;
+      previewSoon();
+      return;
     }
 
     // the floating-reaction set is edited as a space-separated line
@@ -202,7 +213,7 @@
       const was = p.platform;
       p.platform = btn.dataset.platform;
       const nowTT = S.isTT(p.platform), wasTT = S.isTT(was);
-      const nowYT = S.isYT && S.isYT(p.platform), wasYT = S.isYT && S.isYT(was);
+      const nowYT = S.isStatic && S.isStatic(p.platform), wasYT = S.isStatic && S.isStatic(was);
 
       // The watch page and the chat families share nothing: no message list,
       // no bubbles, a desktop canvas instead of a phone. Moving across that
@@ -217,7 +228,7 @@
         p.theme = 'dark';
         E.selectedId = null;
         S.bindScene(p, 0);
-        E.tab = nowYT ? 'video' : 'message';
+        E.tab = (nowYT || (S.isPH && S.isPH(p.platform))) ? 'video' : 'message';
         E.dirty = true; E.renderAll(); return;
       }
 

@@ -1,0 +1,304 @@
+/* ============================================================================
+   pornhub.css — tube-style watch page.
+
+   Laid out from the measurements: 656x369 player starting at x=146, 17px/700
+   title, 12px Arial base on black, a 300-ish rail on the right. Fixed 1280x720
+   canvas, scaled by render.js like the other page platform.
+   ========================================================================= */
+
+.ph-page {
+  --ph-bg: #000000;
+  --ph-text: #ffffff;
+  --ph-muted: #b8b8b8;
+  --ph-dim: #8a8a8a;
+  --ph-panel: #1b1b1b;
+  --ph-line: #2b2b2b;
+  --ph-accent: #ff9000;
+  --ph-up: #08a800;
+  --ph-down: #c40000;
+  --ph-btn: #2a2a2a;
+
+  position: relative;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: top left;
+  overflow: hidden;
+  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  background: var(--ph-bg);
+  color: var(--ph-text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ph-page[data-theme="light"] {
+  --ph-bg: #ffffff;
+  --ph-text: #111111;
+  --ph-muted: #5c5c5c;
+  --ph-dim: #777777;
+  --ph-panel: #f2f2f2;
+  --ph-line: #dddddd;
+  --ph-btn: #ececec;
+}
+
+.ph-page *, .ph-page *::before, .ph-page *::after { box-sizing: border-box; }
+.ph-page button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+.ph-page h1, .ph-page h3, .ph-page p { margin: 0; font-weight: inherit; }
+.ph-page a { color: inherit; text-decoration: none; }
+.ph-page svg { width: 22px; height: 22px; fill: currentColor; display: block; }
+
+/* ------------------------------------------------------------------ header */
+.ph-top {
+  flex: 0 0 62px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--ph-line);
+}
+.ph-brand { display: flex; align-items: center; gap: 8px; }
+.ph-logo {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  color: var(--ph-text);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #ff9000;
+  color: #111;
+}
+.ph-page[data-theme="light"] .ph-logo { color: #fff; background: #111; }
+.ph-logo-rule { display: none; }
+
+.ph-search {
+  flex: 1 1 auto;
+  max-width: 520px;
+  margin: 0 auto;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ph-line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--ph-panel);
+}
+.ph-search-input {
+  flex: 1 1 auto;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ph-text);
+  font: inherit;
+  font-size: 13px;
+  padding: 0 10px;
+}
+.ph-search-input::placeholder { color: var(--ph-dim); }
+.ph-search-btn { flex: 0 0 52px; height: 100%; display: grid; place-items: center; background: var(--ph-btn); }
+.ph-search-btn svg { width: 18px; height: 18px; }
+
+.ph-top-right { display: flex; align-items: center; gap: 10px; }
+.ph-upload {
+  display: flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 12px;
+  border-radius: 4px;
+  background: var(--ph-btn);
+  font-size: 13px; font-weight: 700;
+}
+.ph-upload svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.ph-signin {
+  height: 32px; padding: 0 14px;
+  border-radius: 4px;
+  background: var(--ph-accent);
+  color: #111;
+  font-size: 13px; font-weight: 700;
+}
+
+/* -------------------------------------------------------------------- body */
+.ph-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  gap: 24px;
+  padding: 10px 120px 0;
+}
+.ph-main { flex: 0 0 676px; width: 676px; min-width: 0; }
+.ph-side { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+/* ------------------------------------------------------------------ player */
+.ph-player { width: 676px; background: #000; }
+.ph-stage { position: relative; width: 676px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+.ph-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ph-stage canvas.ph-media { z-index: 1; background: #000; }
+.ph-media.ph-empty { display: grid; place-items: center; color: #5c5c5c; font-size: 14px; background: #141414; }
+.ph-clip {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ph-ctrls {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 0 10px 2px;
+  background: linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0));
+  color: #fff;
+}
+.ph-track { position: relative; height: 3px; border-radius: 2px; background: rgba(255,255,255,.26); margin-bottom: 2px; }
+.ph-track-fill { position: absolute; inset: 0 42% 0 0; background: var(--ph-accent); border-radius: 2px; }
+.ph-track-dot {
+  position: absolute; top: 50%; left: 58%; width: 11px; height: 11px;
+  margin: -5.5px 0 0 -5.5px; border-radius: 50%; background: var(--ph-accent);
+}
+.ph-ctrl-row { display: flex; align-items: center; justify-content: space-between; height: 34px; }
+.ph-ctrl-left, .ph-ctrl-right { display: flex; align-items: center; gap: 2px; color: #fff; }
+.ph-ctrl-row .ph-icon { width: 30px; height: 30px; }
+.ph-ctrl-row .ph-icon svg { width: 20px; height: 20px; fill: #fff; }
+.ph-glyph { font-size: 11px; font-weight: 700; }
+.ph-time { font-size: 11px; margin-left: 6px; }
+
+/* ------------------------------------------------------------------- title */
+.ph-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 20px;
+  margin: 8px 0 0;
+  max-height: 40px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* --------------------------------------------------------------- vote bar */
+.ph-vote {
+  position: relative;
+  margin-top: 7px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--ph-btn);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.ph-vote-fill {
+  position: absolute; inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #08a800, #6fbf1a);
+}
+.ph-vote-label {
+  position: relative;
+  margin-left: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0b0b0b;
+}
+.ph-vote-counts {
+  position: relative;
+  margin-left: auto;
+  margin-right: 8px;
+  font-size: 10px;
+  color: var(--ph-text);
+  opacity: .85;
+}
+
+/* ----------------------------------------------------------------- actions */
+.ph-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.ph-page .ph-btn {
+  display: flex; align-items: center; gap: 7px;
+  height: 32px; padding: 0 12px;
+  border-radius: 4px;
+  background: var(--ph-btn);
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.ph-btn svg { width: 17px; height: 17px; }
+.ph-like svg { fill: var(--ph-up); }
+.ph-dislike svg { fill: var(--ph-down); }
+.ph-page .ph-share { width: 32px; padding: 0; justify-content: center; }
+
+/* ------------------------------------------------------------- description */
+.ph-desc {
+  margin-top: 8px;
+  background: var(--ph-panel);
+  border-radius: 4px;
+  padding: 8px 10px;
+  overflow: hidden;
+}
+.ph-desc-meta { font-weight: 700; font-size: 12px; margin-bottom: 3px; }
+.ph-desc-text {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ph-text);
+  max-height: 32px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  opacity: .92;
+}
+.ph-more { font-weight: 700; font-size: 12px; margin-top: 2px; color: var(--ph-text); }
+
+/* ---------------------------------------------------------------- uploader */
+.ph-uploader { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.ph-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #333; color: #f1f1f1;
+  display: grid; place-items: center;
+  font-size: 16px; font-weight: 700;
+  overflow: hidden; flex: 0 0 38px;
+}
+.ph-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ph-uploader-info { flex: 1 1 auto; min-width: 0; }
+.ph-uploader-name { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; }
+.ph-tick { font-size: 11px; color: var(--ph-accent); }
+.ph-uploader-sub { font-size: 11px; color: var(--ph-muted); margin-top: 1px; }
+.ph-page .ph-subscribe {
+  flex: 0 0 auto;
+  height: 30px; padding: 0 16px;
+  border-radius: 4px;
+  background: var(--ph-accent);
+  color: #111;
+  font-size: 12px; font-weight: 700;
+}
+
+/* -------------------------------------------------------------------- tags */
+.ph-tags { display: flex; align-items: center; gap: 6px; margin-top: 7px; overflow: hidden; white-space: nowrap; }
+.ph-tag { font-size: 12px; color: var(--ph-accent); }
+.ph-tag-sep { color: var(--ph-dim); }
+
+/* -------------------------------------------------------------------- rail */
+.ph-card { display: flex; gap: 8px; }
+.ph-card-thumb {
+  position: relative;
+  align-self: flex-start;
+  flex: 0 0 160px;
+  width: 160px;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #222;
+}
+.ph-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph-card-dur {
+  position: absolute; right: 3px; bottom: 3px;
+  padding: 0 4px; border-radius: 2px;
+  background: rgba(0,0,0,.82);
+  color: #fff; font-size: 10px; font-weight: 700;
+  line-height: 14px;
+}
+.ph-card-meta { flex: 1 1 auto; min-width: 0; }
+.ph-card-title {
+  font-size: 12px; font-weight: 700; line-height: 16px;
+  max-height: 32px; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.ph-card-ch { font-size: 11px; color: var(--ph-accent); margin-top: 3px; }
+.ph-card-stats { font-size: 11px; color: var(--ph-muted); margin-top: 1px; }

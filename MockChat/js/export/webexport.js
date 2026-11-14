@@ -375,8 +375,9 @@
       emit('export:progress', { p: 0.1 });
       window.ScenePlayer.mountStatic(inner, project, project.active || 0, opts.atMs);
       // a page owns a clip: let it park on the stored frame before the snapshot
-      if (window.YouTubeUI && window.YouTubeUI.still) {
-        try { await window.YouTubeUI.still(inner, project); } catch (e) {}
+      const pageUI = (window.Store.isPH && window.Store.isPH(project.platform)) ? window.PHUI : window.YouTubeUI;
+      if (pageUI && pageUI.still) {
+        try { await pageUI.still(inner, project); } catch (e) {}
       }
       await settle(inner);
       emit('export:progress', { p: 0.4 });

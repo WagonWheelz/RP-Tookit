@@ -434,12 +434,13 @@
 
     // The watch page is a desktop document — its own chassis, built as markup
     // and laid out at a fixed 1280x720 then scaled to the project's canvas.
-    if (window.Store.isYT(project.platform) && window.YouTubeUI) {
+    const pageUI = window.Store.isPH && window.Store.isPH(project.platform) ? window.PHUI : window.YouTubeUI;
+    if (window.Store.isStatic(project.platform) && pageUI) {
       // appendChild, not innerHTML: the module hands back the element it built
       // (every field went in via textContent), and re-parsing would orphan the
       // video painter onto a detached copy.
-      phone.appendChild(window.YouTubeUI.body(project));
-      const page = phone.querySelector('.yt-page');
+      phone.appendChild(pageUI.body(project));
+      const page = phone.querySelector('.yt-page') || phone.querySelector('.ph-page');
       if (page) {
         // the page is laid out at 1280x720 always; the canvas preset picks the
         // scale, never the markup

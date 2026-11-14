@@ -40,9 +40,11 @@
   // A desktop watch page: one fixed layout, no message list, nothing to animate.
   const YT_PLATFORMS = ['youtube'];
   const isYT = (p) => YT_PLATFORMS.indexOf(p) >= 0;
+  const PH_PLATFORMS = ['pornhub'];
+  const isPH = (p) => PH_PLATFORMS.indexOf(p) >= 0;
   // A page platform is a still: it renders once from its fields and has no
   // message list, so there is no timeline to build, seek or play.
-  const STATIC_PLATFORMS = ['youtube'];
+  const STATIC_PLATFORMS = ['youtube', 'pornhub'];
   const isStatic = (p) => STATIC_PLATFORMS.indexOf(p) >= 0;
   const typesFor = (platform) => (isTT(platform) ? MESSAGE_TYPES_TT : MESSAGE_TYPES);
 
@@ -111,6 +113,12 @@
     },
     // The watch page is measured off the real thing: #0f0f0f / #f1f1f1 dark,
     // #ffffff / #0f0f0f light, with the pill colour as the raised surface.
+    pornhub: {
+      dark:  { bg: '#000000', bubbleIn: '#2a2a2a', bubbleOut: '#ff9000', textIn: '#ffffff', textOut: '#ffffff',
+               header: '#000000', headerText: '#ffffff', meta: '#b8b8b8', accent: '#ff9000', inputBg: '#1b1b1b', bodyPattern: false },
+      light: { bg: '#ffffff', bubbleIn: '#ececec', bubbleOut: '#ff9000', textIn: '#111111', textOut: '#111111',
+               header: '#ffffff', headerText: '#111111', meta: '#5c5c5c', accent: '#ff9000', inputBg: '#f2f2f2', bodyPattern: false }
+    },
     youtube: {
       dark:  { bg: '#0f0f0f', bubbleIn: '#272727', bubbleOut: '#3ea6ff', textIn: '#f1f1f1', textOut: '#f1f1f1',
                header: '#0f0f0f', headerText: '#f1f1f1', meta: '#aaaaaa', accent: '#ff0033', inputBg: '#121212', bodyPattern: false },
@@ -279,11 +287,40 @@
     };
   }
 
+  // The tube-style page. Same idea as defaultYT: the fields live here so a
+  // saved project always carries them.
+  function defaultPH() {
+    return {
+      title: 'The video title sits here, two lines at most before it clips',
+      channel: 'Uploader name',
+      handle: '@uploader',
+      subs: '1.2K videos',
+      views: '482K views',
+      date: '2 days ago',
+      likes: '12K',
+      dislikes: '3K',
+      percent: 80,
+      duration: '12:34',
+      at: 0,
+      tags: ['tag one', 'tag two', 'tag three', 'tag four', 'tag five'],
+      description: 'The description panel sits under the tags. Put the blurb, the credits and anything else that would go in the box here — it stays a fixed height so the page never shifts.',
+      video: null,
+      thumb: null,
+      avatar: null,
+      sidebar: [
+        { title: 'A related video, two lines of title at most', channel: 'Another uploader', meta: '1.4M views', thumb: null, duration: '8:21' },
+        { title: 'Second related video in the rail', channel: 'Another uploader', meta: '88K views', thumb: null, duration: '4:07' },
+        { title: 'Third related video, same card shape', channel: 'Another uploader', meta: '2.2M views', thumb: null, duration: '21:15' },
+        { title: 'Fourth related video fills the rail', channel: 'Another uploader', meta: '310K views', thumb: null, duration: '9:58' }
+      ]
+    };
+  }
+
   function defaultChat(platform) {
     const p = PRESETS[platform].light;
     // A watch page is a desktop canvas: 1280x720 unless the project says
     // otherwise, no status bar, no input bar, no chat chrome at all.
-    if (isYT(platform)) {
+    if (isYT(platform) || isPH(platform)) {
       return {
         contactName: 'Channel name',
         contactSubtitle: '',
@@ -311,6 +348,7 @@
         height: 720,
         scrollTop: 0,
         yt: defaultYT(),
+        ph: defaultPH(),
         brand: defaultBrand()
       };
     }
@@ -550,8 +588,8 @@
   }
 
   function defaultMessages(platform) {
-    // A watch page has no message list — nothing to time, nothing to animate.
-    if (isYT(platform)) return [];
+    // A page has no message list — nothing to time, nothing to animate.
+    if (isStatic(platform)) return [];
     if (platform === 'tiktoklive') {
       return [
         defaultMessage({ type: 'join',    user: 'kayla_ww', anim: { delay: 700, typing: 0, effect: 'slide' } }),
@@ -1030,7 +1068,7 @@
 
   window.Store = {
     uid, defaultFit, fitMode, KEYBOARD_EMOJI, isEmojiChar, graphemes, hash32,
-    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, isYT, isStatic, TT_LAYOUTS, TT_GIFTS,
+    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, isYT, isPH, isStatic, TT_LAYOUTS, TT_GIFTS,
     PLATFORM_NAMES, brandName, convertMessages,
     REACH, fmtCount, genStats,
     TRANSITIONS, transitionMs, defaultScene, bindScene, pack, syncSceneGeometry,
@@ -1038,7 +1076,7 @@
     VIDEO_EXT, AUDIO_EXT, isVideoMedia, isAudioMedia, isTimeBased, mediaMs, stageMedia,
     defaultPerson, migratePerson, personLabel, findPerson,
     EFFECTS, FONTS, PRESETS, DEVICES, RESOLUTIONS, FRAME_PAD, CHOICES,
-    defaultProject, defaultMessage, defaultMessages, defaultChat, defaultTT, defaultYT, defaultBrand, defaultCell,
+    defaultProject, defaultMessage, defaultMessages, defaultChat, defaultTT, defaultYT, defaultPH, defaultBrand, defaultCell,
     migrate, paletteFor, outerSize, resolveScale, screenW, screenH
   };
 })();

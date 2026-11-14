@@ -383,6 +383,7 @@
   function inspectorChat() {
     const p = E.project;
     if (S.isTT(p.platform)) return inspectorScreen();
+    if (S.isPH && S.isPH(p.platform)) return inspectorPH();
     if (S.isYT && S.isYT(p.platform)) return inspectorVideo();
     const c = p.chat;
     let h = html``;
@@ -717,6 +718,67 @@
     return h;
   }
 
+
+  // --------------------------------------------------------------- tube page
+  // Same contract as the watch page: every value on the page is a field.
+  function inspectorPH() {
+    const p = E.project;
+    const c = p.chat;
+    const ph = c.ph || (c.ph = (S.defaultPH ? S.defaultPH() : {}));
+    let h = html``;
+
+    h = cat(h, section('Canvas'));
+    h = cat(h, fld('Size', cat(html`<div class="seg full d-tabs d-tabs-box d-tabs-sm" role="tablist" aria-label="Canvas size">`,
+      html`<button data-act="ytsize" data-w="1280" data-h="720" role="tab" class="d-tab ${(c.width === 1280 && c.height === 720 ? 'on d-tab-active' : '')}">1280 × 720</button>`,
+      html`<button data-act="ytsize" data-w="1920" data-h="1080" role="tab" class="d-tab ${(c.width === 1920 && c.height === 1080 ? 'on d-tab-active' : '')}">1920 × 1080</button></div>`),
+      'Drawn at 1280×720 and scaled to the canvas you pick.'));
+
+    h = cat(h, section('The video'));
+    h = cat(h, mediaBlock('chat.ph.video', 'video', 'Video file', null,
+      'Played muted and looped in the player. Leave it empty to use the thumbnail only.'));
+    h = cat(h, mediaBlock('chat.ph.thumb', 'image', 'Thumbnail / poster', null,
+      'Shown when no clip is attached, and behind it when one is.'));
+    h = cat(h, fld('Duration', txt('chat.ph.duration', '12:34'), 'The time on the right of the player controls and on rail cards.'));
+
+    h = cat(h, section('Title and uploader'));
+    h = cat(h, fld('Video title', area('chat.ph.title', 'Video title', 2)));
+    h = cat(h, mediaBlock('chat.ph.avatar', 'image', 'Uploader picture', 'round'));
+    h = cat(h, fld('Uploader name', txt('chat.ph.channel', 'Uploader name')));
+    h = cat(h, fld('Handle', txt('chat.ph.handle', '@uploader')));
+    h = cat(h, fld('Video count', txt('chat.ph.subs', '1.2K videos')));
+
+    h = cat(h, section('Numbers'));
+    h = cat(h, fld('Views', txt('chat.ph.views', '482K views')));
+    h = cat(h, fld('Date line', txt('chat.ph.date', '2 days ago')));
+    h = cat(h, fld('Thumbs up', txt('chat.ph.likes', '12K')));
+    h = cat(h, fld('Thumbs down', txt('chat.ph.dislikes', '3K')));
+    h = cat(h, fld('Vote bar', rng('chat.ph.percent', 0, 100, 1, '%'), 'The green segment, and the number printed on it.'));
+
+    h = cat(h, section('Tags'));
+    h = cat(h, fld('Tags', cat(html`<input class="d-input d-input-sm" type="text" data-path="chat.ph.tagsText"
+      value="${(ph.tags || []).join(', ')}" placeholder="tag one, tag two">`),
+      'Comma separated. They are drawn as links with dividers between them.'));
+
+    h = cat(h, section('Description'));
+    h = cat(h, fld('Text', area('chat.ph.description', 'Description', 4),
+      'Shown collapsed to two lines, the way the real page does it.'));
+
+    h = cat(h, section('Related rail'));
+    (ph.sidebar || []).forEach((item, i) => {
+      h = cat(h, fld('Card ' + (i + 1),
+        cat(html`<div class="row2" style="gap:6px">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.ph.sidebar.${i}.title" value="${item.title || ''}" placeholder="Title">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.ph.sidebar.${i}.channel" value="${item.channel || ''}" placeholder="Uploader"></div>`,
+        html`<div class="row2" style="gap:6px;margin-top:6px">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.ph.sidebar.${i}.meta" value="${item.meta || ''}" placeholder="1.4M views">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.ph.sidebar.${i}.duration" value="${item.duration || ''}" placeholder="8:21"></div>`)));
+      h = cat(h, mediaBlock('chat.ph.sidebar.' + i + '.thumb', 'image', 'Card ' + (i + 1) + ' picture'));
+    });
+
+    h = cat(h, note(html`This page has no message list, so there is nothing to animate — export it as an image, or as an MP4 when a clip is attached.`));
+    return h;
+  }
+
   E.renderInspector = function () {
     const map = { message: inspectorMessage, chat: inspectorChat, style: inspectorStyle, timeline: inspectorTimeline, export: inspectorExport, video: inspectorVideo };
     const host = E.$('#inspector');
@@ -727,7 +789,7 @@
     const same = host.dataset.key === key;
     // the conversation column holds messages and steps, neither of which a
     // watch page has
-    document.body.classList.toggle('yt-mode', !!(S.isYT && S.isYT(E.project.platform)));
+    document.body.classList.toggle('yt-mode', !!(S.isStatic && S.isStatic(E.project.platform)));
     setHTML(host, (map[E.tab] || inspectorMessage)());
     host.dataset.key = key;
     if (same) host.scrollTop = keep;
@@ -741,7 +803,7 @@
       }
       // A watch page has no messages, no bubbles and no timeline, so it shows
       // one tab. Everything chat-shaped is hidden rather than dead.
-      const yt = !!(S.isYT && S.isYT(E.project.platform));
+      const yt = !!(S.isStatic && S.isStatic(E.project.platform));
       if (b.dataset.tab === 'video') {
         b.style.display = yt ? '' : 'none';
         if (!yt && E.tab === 'video') E.tab = 'chat';
