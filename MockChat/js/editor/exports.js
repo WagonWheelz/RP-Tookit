@@ -66,6 +66,15 @@
     // the recording plays every scene, so the gate and the label have to
     // measure the whole sequence, not just the one you happen to be standing on
     const total = window.ScenePlayer.totalDuration(E.project);
+    if (S.isStatic && S.isStatic(E.project.platform)) {
+      return E.toast('This page is a still — use Export image.', 'err');
+    }
+    if (S.isStatic && S.isStatic(E.project.platform)) {
+      return E.toast('This page is a still — use Export image.', 'err');
+    }
+    if (S.isStatic && S.isStatic(E.project.platform)) {
+      return E.toast('This page is a still — use Export image.', 'err');
+    }
     if (total < 300) { E.toast('Nothing to animate — add some messages first.', 'err'); return; }
     const r = S.resolveScale(E.project, E.project.exportOpts.vidRes);
     busy(true, (E.caps.platform === 'web' ? 'Rendering ' : 'Recording ') + (total / 1000).toFixed(1) + 's of video…');

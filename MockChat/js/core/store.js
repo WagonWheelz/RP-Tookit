@@ -40,6 +40,10 @@
   // A desktop watch page: one fixed layout, no message list, nothing to animate.
   const YT_PLATFORMS = ['youtube'];
   const isYT = (p) => YT_PLATFORMS.indexOf(p) >= 0;
+  // A page platform is a still: it renders once from its fields and has no
+  // message list, so there is no timeline to build, seek or play.
+  const STATIC_PLATFORMS = ['youtube'];
+  const isStatic = (p) => STATIC_PLATFORMS.indexOf(p) >= 0;
   const typesFor = (platform) => (isTT(platform) ? MESSAGE_TYPES_TT : MESSAGE_TYPES);
 
   const TT_LAYOUTS = [
@@ -1026,7 +1030,7 @@
 
   window.Store = {
     uid, defaultFit, fitMode, KEYBOARD_EMOJI, isEmojiChar, graphemes, hash32,
-    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, isYT, TT_LAYOUTS, TT_GIFTS,
+    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, isYT, isStatic, TT_LAYOUTS, TT_GIFTS,
     PLATFORM_NAMES, brandName, convertMessages,
     REACH, fmtCount, genStats,
     TRANSITIONS, transitionMs, defaultScene, bindScene, pack, syncSceneGeometry,

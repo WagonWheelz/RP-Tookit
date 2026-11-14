@@ -169,6 +169,15 @@
     const keep = project.active || 0;
     S().bindScene(project, index == null ? keep : index);
     const view = R().mount(layers[0], project);
+
+    // A page platform is one still frame: no messages means no steps, so
+    // building a timeline would only give the editor something to seek.
+    if (S().isStatic && S().isStatic(project.platform)) {
+      showNow(layers[0]);
+      sizeStack(stack, layers[0]);
+      return { stack, view, tl: null, layer: layers[0], still: true };
+    }
+
     const tl = T().create(view, project);
     if (atMs != null && !S().isRevisit(project, project.active)) tl.seek(atMs); else tl.showAll();
     showNow(layers[0]);

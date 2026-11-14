@@ -52,6 +52,12 @@
   --yt-blue: #065fd4;
 }
 
+/* A watch page is one document, not a conversation: no message list, no step
+   strip. Collapsing the column means changing the grid, not hiding the panel
+   (hiding it just lets the stage fall into the 290px column). */
+body.yt-mode .main { grid-template-columns: 1fr 340px; }
+body.yt-mode .col.left { display: none; }
+
 .yt-page *, .yt-page *::before, .yt-page *::after { box-sizing: border-box; }
 .yt-page button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
 .yt-page h1, .yt-page h3, .yt-page p { margin: 0; font-weight: inherit; }
@@ -60,8 +66,8 @@
 
 /* ---------------------------------------------------------------- masthead */
 .yt-mast {
-  height: 54px;
-  flex: 0 0 54px;
+  height: 52px;
+  flex: 0 0 52px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -179,17 +185,17 @@
 .yt-title {
   font-size: 20px;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 26px;
   letter-spacing: -.1px;
-  margin: 8px 0 0;
-  max-height: 56px;
+  margin: 6px 0 0;
+  max-height: 52px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
-.yt-owner { margin-top: 8px; }
+.yt-owner { margin-top: 6px; }
 .yt-owner-row { display: flex; align-items: center; gap: 12px; }
 .yt-avatar {
   width: 40px; height: 40px; border-radius: 50%;
@@ -213,7 +219,7 @@
 }
 
 /* ---------------------------------------------------------------- actions */
-.yt-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.yt-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .yt-page .yt-pill {
   display: flex; align-items: center; gap: 6px;
   height: 36px; padding: 0 16px;
@@ -235,26 +241,26 @@
 }
 
 /* ------------------------------------------------------------ description */
-.yt-desc-wrap { margin-top: 8px; }
+.yt-desc-wrap { margin-top: 6px; }
 .yt-desc {
   background: var(--yt-pill);
   border-radius: 12px;
-  padding: 12px;
+  padding: 9px 12px 8px;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 19px;
   overflow: hidden;
 }
-.yt-desc-meta { font-weight: 600; margin-bottom: 4px; }
+.yt-desc-meta { font-weight: 600; margin-bottom: 2px; }
 .yt-desc-count { font-weight: 600; }
 .yt-desc-text {
   white-space: pre-wrap;
-  max-height: 40px;
+  max-height: 36px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.yt-more-btn { font-weight: 600; margin-top: 2px; color: var(--yt-text); }
+.yt-more-btn { font-weight: 600; margin-top: 0; color: var(--yt-text); }
 
 /* -------------------------------------------------------------- side rail */
 .yt-side-label { display: none; }
