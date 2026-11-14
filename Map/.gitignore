@@ -15,3 +15,6 @@ vite.config.ts.timestamp-*
 !/static/maps/atlas/1
 !/static/maps/atlas/2
 maps.config.js
+!/static/maps/atlas/3
+!/static/maps/atlas/4
+!/static/maps/atlas/5

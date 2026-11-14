@@ -7,7 +7,7 @@ export default {
       id: 'Atlas',
       imageHeight: 8192,
       imageWidth: 8192,
-      maxZoom: 2,
+      maxZoom: 5,
       minZoom: 1,
       noWrap: true,
       urlTemplate: 'maps/atlas/{z}/{x}/{y}.webp',
