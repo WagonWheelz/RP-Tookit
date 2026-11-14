@@ -25,10 +25,13 @@ const render = () => {
   ctx.shadowOffsetY = 0;
   // Draw Image
   ctx.drawImage(image, 0, 0);
-  if (rank !== null) {
-    let logo = new Image();
-    logo.src = images[rank.name].src;
-    ctx.drawImage(image, 465, 105);
+  if (rank !== null && images[rank.name]) {
+    const logo = images[rank.name];
+    if (logo.complete && logo.naturalWidth > 0) {
+      ctx.drawImage(logo, 465, 105);
+    } else {
+      logo.onload = render;
+    }
   }
   // Set text properties
   ctx.shadowOffsetY = 5;
