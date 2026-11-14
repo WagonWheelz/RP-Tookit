@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XION-ChaseCam</title>
+    <link rel="icon" href="../Assets/favicon.png" type="image">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #120d08;
+            --card: #1c1409;
+            --line: #3a2c12;
+            --text: #f5efe6;
+            --sub: #b8a78c;
+            --dim: #8a7a5f;
+            --accent: #f59e0b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        a { color: inherit; text-decoration: none; }
+
+        .topbar { border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+        .topbar .wrap { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+        .mark { font-weight: 700; color: var(--accent); border: 1px solid var(--line); padding: 5px 9px; font-size: 1rem; letter-spacing: 0.04em; }
+        .brand { font-weight: 600; font-size: 1.05rem; }
+        .spacer { flex: 1; }
+        .back { font-size: 0.9rem; color: var(--sub); }
+        .back:hover { color: var(--text); }
+
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px 48px; }
+        .intro { padding: 40px 0 8px; }
+        .intro .rule { width: 40px; height: 3px; background: var(--accent); margin-bottom: 18px; }
+        .intro h1 { font-family: 'Oswald', sans-serif; font-size: 2rem; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px; }
+        .intro p { color: var(--sub); font-size: 0.98rem; line-height: 1.55; max-width: 70ch; margin: 0; }
+
+        h2.section { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.2rem; margin: 40px 0 16px; color: var(--accent); }
+
+        /* config grid */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+        @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+
+        .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .field label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sub); }
+        .field input[type="text"] {
+            background: #fff; border: 1px solid var(--line); color: #111827;
+            padding: 10px 12px; font-size: 1rem; font-family: inherit; width: 100%;
+        }
+        .field input[type="text"]:focus { outline: none; border-color: var(--accent); }
+        .field .hint { font-size: 0.75rem; color: var(--dim); }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 9px;
+            background: var(--accent); color: #180f02; border: 1px solid var(--accent);
+            padding: 11px 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+            cursor: pointer; font-family: inherit; border-radius: 6px;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn.ghost { background: transparent; color: var(--sub); border-color: var(--line); }
+        .btn.ghost:hover { color: var(--text); border-color: var(--dim); }
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+        /* live overlay preview */
+        .preview-box {
+            position: relative; background: #000; border: 1px solid var(--line); border-radius: 8px;
+            min-height: 260px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .preview-box .placeholder { color: #4a4a4a; font-size: 0.85rem; }
+        .preview-box video { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .preview-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        /* the bodycam overlay (DOM preview) */
+        .bcam {
+            position: absolute; top: 14px; right: 14px; z-index: 2;
+            background: rgba(0,0,0,0.55); border-radius: 10px; padding: 8px 10px;
+            font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #afafaf; text-align: right;
+        }
+        .bcam .logo-row { text-align: right; margin-bottom: 2px; }
+        .bcam .logo-row img { height: 26px; width: auto; }
+        .bcam .rec { color: #fff; }
+        .bcam .rec .dot { color: #ff2d2d; animation: blink 1.5s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* video/export area */
+        .note {
+            margin-top: 16px; background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.25);
+            border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 16px;
+            color: var(--sub); font-size: 0.85rem; line-height: 1.55;
+        }
+        progress { width: 100%; height: 8px; margin-top: 12px; accent-color: var(--accent); }
+
+        footer { margin-top: auto; border-top: 1px solid var(--line); padding: 22px 0; text-align: center; color: var(--dim); font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <div class="wrap">
+            <span class="mark">XION</span>
+            <span class="brand">ChaseCam</span>
+            <span class="spacer"></span>
+            <a class="back" href="../index.html"><i class="fa-solid fa-arrow-left"></i> Back to toolkit</a>
+        </div>
+    </nav>
+
+    <div class="wrap">
+
+        <div class="intro">
+            <div class="rule"></div>
+            <h1>XION-ChaseCam</h1>
+            <p>Set your player data, grab an OBS-ready bodycam overlay, or burn the overlay straight onto a clip you upload.</p>
+        </div>
+
+        <div class="grid">
+
+            <!-- ============ LEFT: config + preview ============ -->
+            <div>
+                <h2 class="section">Overlay data</h2>
+                <div class="card">
+                    <div class="field">
+                        <label>Player name</label>
+                        <input type="text" id="fPlayer" value="M. MAX" spellcheck="false">
+                    </div>
+                    <div class="field">
+                        <label>Callsign / badge</label>
+                        <input type="text" id="fCallsign" value="[214]" spellcheck="false">
+                    </div>
+                    <div class="field">
+                        <label>Agency</label>
+                        <input type="text" id="fAgency" value="SHERIFFS DEPARTMENT" spellcheck="false">
+                    </div>
+                    <div class="field">
+                        <label>Icon (optional, replaces the AXON logo)</label>
+                        <input type="file" id="fIcon" accept="image/*">
+                        <span class="hint">Square PNG with transparency works best.</span>
+                    </div>
+                </div>
+
+                <h2 class="section">Live preview</h2>
+                <div class="preview-box">
+                    <div class="placeholder" id="ph">Loading preview&hellip;</div>
+                    <div class="bcam" id="bcam">
+                        <div class="logo-row" id="bcamLogo"><img id="bcamImg" alt="logo"></div>
+                        <div class="rec">REC&nbsp;<span class="dot">&bull;</span>&nbsp;&nbsp;AXON&nbsp;BODYCAM&trade;</div>
+                        <div><span id="bcamPlayer">M. MAX</span> <span id="bcamCallsign">[214]</span></div>
+                        <div id="bcamAgency">SHERIFFS DEPARTMENT</div>
+                        <div><span id="bcamDate"></span> <span id="bcamTime"></span></div>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn" id="btnDownload"><i class="fa-solid fa-download"></i> Download OBS overlay</button>
+                </div>
+                <div class="note" id="obsNote" hidden></div>
+            </div>
+
+            <!-- ============ RIGHT: video ============ -->
+            <div>
+                <h2 class="section">Apply to a video</h2>
+                <div class="card">
+                    <div class="field">
+                        <label>Upload a clip</label>
+                        <input type="file" id="fVideo" accept="video/*">
+                        <span class="hint">Processed entirely in your browser - nothing is uploaded anywhere.</span>
+                    </div>
+                    <div class="preview-box">
+                        <video id="video" muted playsinline></video>
+                        <canvas id="canvas"></canvas>
+                        <div class="placeholder" id="videoPh">Upload a video to preview the overlay on it.</div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn" id="btnExport" disabled><i class="fa-solid fa-clapperboard"></i> Export combined video</button>
+                    </div>
+                    <progress id="prog" max="1" value="0" hidden></progress>
+                    <div class="note">
+                        <strong>About quality:</strong> the browser re-encodes the clip, so the combined file is high-bitrate but not bit-for-bit identical to the source.
+                        For a truly lossless result, use <em>Download OBS overlay</em> and layer it over your original recording in OBS as a browser source.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>Remake by WagonWheel. GPL v2.</footer>
+
+    <script>
+        (function () {
+            const $ = (id) => document.getElementById(id);
+            const DEFAULT_LOGO = null; // filled from template fetch below
+            let iconData = null;        // user-uploaded icon as data URL
+            let templateHtml = '';      // top-right.html source, fetched once
+            let logoDataUrl = '';       // AXON logo data url extracted from template
+
+            const fPlayer = $('fPlayer'), fCallsign = $('fCallsign'), fAgency = $('fAgency'), fIcon = $('fIcon');
+            const bcam = $('bcam'), bcamImg = $('bcamImg'), bcamLogo = $('bcamLogo');
+            const bcamPlayer = $('bcamPlayer'), bcamCallsign = $('bcamCallsign'), bcamAgency = $('bcamAgency');
+            const bcamDate = $('bcamDate'), bcamTime = $('bcamTime');
+            const ph = $('ph'), videoPh = $('videoPh');
+
+            // ---- live overlay preview ----
+            function escHtml(s) {
+                return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            }
+            function refreshPreview() {
+                bcamPlayer.textContent = fPlayer.value || '&nbsp;';
+                bcamCallsign.textContent = fCallsign.value;
+                bcamAgency.textContent = fAgency.value;
+                ph.style.display = 'none';
+                bcam.style.display = 'block';
+            }
+            [fPlayer, fCallsign, fAgency].forEach(el => el.addEventListener('input', refreshPreview));
+
+            // date/time ticker
+            function tick() {
+                const now = new Date();
+                const mm = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+                bcamDate.textContent = ('0'+now.getDate()).slice(-2) + '-' + mm[now.getMonth()] + '-' + now.getFullYear();
+                bcamTime.textContent = now.toLocaleTimeString('en-GB', {hour12:false});
+            }
+            setInterval(tick, 250); tick();
+
+            // icon upload
+            fIcon.addEventListener('change', () => {
+                const file = fIcon.files[0];
+                if (!file) { iconData = null; bcamImg.removeAttribute('src'); bcamLogo.style.display = 'none'; return; }
+                const r = new FileReader();
+                r.onload = () => {
+                    iconData = r.result;
+                    bcamImg.src = iconData;
+                    bcamLogo.style.display = 'block';
+                };
+                r.readAsDataURL(file);
+            });
+
+            // ---- fetch the overlay template + extract its logo ----
+            fetch('./top-right.html')
+                .then(r => r.text())
+                .then(t => {
+                    templateHtml = t;
+                    const m = t.match(/src="(data:image\/png;base64,[^"]+)"/);
+                    if (m) {
+                        logoDataUrl = m[1];
+                        bcamImg.src = logoDataUrl;
+                        bcamLogo.style.display = 'block';
+                    } else {
+                        bcamLogo.style.display = 'none';
+                    }
+                    refreshPreview();
+                })
+                .catch(() => { refreshPreview(); });
+
+            // ---- OBS overlay download ----
+            function escJs(s) {
+                return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n');
+            }
+            $('btnDownload').addEventListener('click', async () => {
+                if (!templateHtml) {
+                    alert('Overlay template still loading - try again in a second.');
+                    return;
+                }
+                let out = templateHtml;
+                out = out.replace(/const player = "[^"]*";/, 'const player = "' + escJs(fPlayer.value || 'PLAYER') + '";');
+                out = out.replace(/const agency = "[^"]*";/, 'const agency = "' + escJs(fAgency.value || 'AGENCY') + '";');
+                out = out.replace(/const callsign = "[^"]*";/, 'const callsign = "' + escJs(fCallsign.value || '[000]') + '";');
+                if (iconData) {
+                    out = out.replace(/src="data:image\/png;base64,[^"]*"/, 'src="' + iconData + '"');
+                }
+                // drop the 21MB beep audio so the single downloaded file works standalone
+                out = out.replace(/<audio[\s\S]*?<\/audio>/, '<!-- beep audio omitted; add double-beep.wav back if you want sound -->');
+
+                const blob = new Blob([out], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'xion-chasecam-overlay.html';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+
+                const note = $('obsNote');
+                note.hidden = false;
+                note.textContent = 'Saved xion-chasecam-overlay.html. In OBS add it as a Browser Source (local file) above your video layer.';
+            });
+
+            // ---- video compositing + export ----
+            const video = $('video'), canvas = $('canvas'), ctx = canvas.getContext('2d');
+            let hasVideo = false;
+
+            $('fVideo').addEventListener('change', () => {
+                const file = $('fVideo').files[0];
+                if (!file) return;
+                video.src = URL.createObjectURL(file);
+                videoPh.style.display = 'none';
+                hasVideo = true;
+                $('btnExport').disabled = false;
+            });
+
+            video.addEventListener('loadedmetadata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            });
+
+            function roundRect(c, x, y, w, h, r) {
+                c.beginPath();
+                c.moveTo(x+r, y); c.arcTo(x+w, y, x+w, y+h, r); c.arcTo(x+w, y+h, x, y+h, r);
+                c.arcTo(x, y+h, x, y, r); c.arcTo(x, y, x+w, y, r); c.closePath();
+            }
+
+            function drawOverlayOn(c, W, H, t) {
+                const pad = Math.max(10, W * 0.02);
+                const boxW = Math.min(W * 0.32, 420);
+                const boxH = boxW * 0.42;
+                const x = W - boxW - pad, y = pad;
+
+                c.save();
+                c.fillStyle = 'rgba(0,0,0,0.55)';
+                roundRect(c, x, y, boxW, boxH, 10); c.fill();
+
+                c.textBaseline = 'alphabetic';
+                c.font = '600 ' + (boxW*0.052) + 'px "Share Tech Mono", monospace';
+                // REC + AXON line
+                if ((Math.floor(t/600) % 2) === 0) {
+                    c.fillStyle = '#ff2d2d';
+                    c.beginPath(); c.arc(x + boxW*0.06, y + boxH*0.16, boxW*0.02, 0, Math.PI*2); c.fill();
+                }
+                c.fillStyle = '#e8e8e8';
+                c.fillText('REC   AXON BODYCAM', x + boxW*0.10, y + boxH*0.20);
+                // player + callsign
+                c.fillText(fPlayer.value, x + boxW*0.05, y + boxH*0.42);
+                c.textAlign = 'right';
+                c.fillText(fCallsign.value, x + boxW*0.95, y + boxH*0.42);
+                c.textAlign = 'left';
+                // agency
+                c.fillStyle = '#bdbdbd';
+                c.font = (boxW*0.045) + 'px "Share Tech Mono", monospace';
+                c.fillText(fAgency.value, x + boxW*0.05, y + boxH*0.62);
+                // date / time
+                const now = new Date();
+                const mm = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+                const ds = ('0'+now.getDate()).slice(-2) + '-' + mm[now.getMonth()] + '-' + now.getFullYear();
+                const ts = now.toLocaleTimeString('en-GB', {hour12:false});
+                c.fillText(ds + '  ' + ts, x + boxW*0.05, y + boxH*0.82);
+                c.restore();
+            }
+
+            // continuous draw: video frame + overlay (used for preview AND captured for export)
+            function drawLoop(now) {
+                const W = canvas.width, H = canvas.height;
+                if (W > 0 && H > 0) {
+                    ctx.clearRect(0, 0, W, H);
+                    if (hasVideo && video.readyState >= 2) {
+                        ctx.drawImage(video, 0, 0, W, H);
+                    } else {
+                        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+                    }
+                    drawOverlayOn(ctx, W, H, now);
+                }
+                requestAnimationFrame(drawLoop);
+            }
+            requestAnimationFrame(drawLoop);
+
+            // ---- export combined video ----
+            $('btnExport').addEventListener('click', async () => {
+                if (!hasVideo || !video.videoWidth) { alert('Upload a video first.'); return; }
+                const btn = $('btnExport');
+                btn.disabled = true;
+                const prog = $('prog');
+                prog.hidden = false; prog.value = 0;
+
+                const mimes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+                const mime = mimes.find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m)) || 'video/webm';
+                const stream = canvas.captureStream(30);
+                const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 16_000_000 });
+                const chunks = [];
+                rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+                rec.onstop = () => {
+                    const blob = new Blob(chunks, { type: mime });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'chasecam-' + Date.now() + '.webm';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+                    prog.hidden = true;
+                    btn.disabled = false;
+                };
+
+                rec.start(200);
+                video.currentTime = 0;
+                await video.play();
+                const onEnd = () => { rec.stop(); video.pause(); };
+                video.addEventListener('ended', onEnd, { once: true });
+
+                // progress by currentTime
+                const iv = setInterval(() => {
+                    if (video.duration) prog.value = video.currentTime / video.duration;
+                }, 250);
+                video.addEventListener('ended', () => clearInterval(iv), { once: true });
+            });
+        })();
+    </script>
+</body>
+</html>
