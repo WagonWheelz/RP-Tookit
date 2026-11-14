@@ -12,8 +12,11 @@
 
 body {
   font-family: 'Source Sans Pro', sans-serif;
-  background: radial-gradient(1000px 520px at 50% -10%, rgba(229,231,235,0.07), transparent 62%), var(--bg);
+  background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -106,7 +109,7 @@ h4 { font-size: 1.05rem; margin: 0 0 12px; }
 .ms-auto { margin-left: auto; }
 
 /* ---------- footer ---------- */
-.foot { border-top: 1px solid var(--line); padding: 24px 0; color: var(--muted); font-size: 0.85rem; }
+.foot { border-top: 1px solid var(--line); padding: 24px 0; color: var(--muted); font-size: 0.85rem; margin-top: auto; }
 .foot .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 @media (max-width: 600px) {
