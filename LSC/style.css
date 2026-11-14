@@ -66,13 +66,14 @@ canvas { max-width: 100%; height: auto; }
 .ranks input[type="button"]:hover { background: rgba(109,92,255,0.15); }
 .ranks input[type="button"].btn-active { background: var(--accent); color: #0b0d10; }
 
-.inputs { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
-.inputs label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; margin-bottom: 4px; }
-.form-control { background: #ffffff; border: 1px solid var(--line); color: #111827; padding: 10px 12px; font-size: 1rem; font-family: inherit; width: 100%; }
+.inputs { display: flex; flex-direction: column; gap: 0; margin-bottom: 32px; }
+.inputs label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; margin-bottom: 8px; }
+.form-control { background: #ffffff; border: 1px solid var(--line); color: #111827; padding: 10px 12px; font-size: 1rem; font-family: inherit; width: 100%; margin-bottom: 18px; }
 .form-control::placeholder { color: #9ca3af; }
 .form-control:focus { outline: none; border-color: var(--accent); }
 
-.row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-bottom: 4px; }
+.row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-bottom: 18px; }
+.inputs .row .form-control { margin-bottom: 0; }
 .col-6 { grid-column: span 6; }
 .col-md-2 { grid-column: span 2; }
 .col-md-6 { grid-column: span 6; }
