@@ -243,7 +243,7 @@
         /* ---------- SIGNATURE CREATORS ---------- */
         .creators {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 20px;
         }
         .creator {
@@ -322,8 +322,12 @@
         .footer-links i { margin-right: 8px; }
         .copyright { color: #555; font-size: 0.75rem; margin-top: 10px; }
 
+        @media (max-width: 900px) {
+            .creators { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
         @media (max-width: 600px) {
             .section-head .tag { display: none; }
+            .creators { grid-template-columns: minmax(0, 1fr); }
             .f-actions { flex-direction: column; align-items: stretch; }
             .f-actions .btn { justify-content: center; }
         }
