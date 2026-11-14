@@ -203,7 +203,8 @@
             const DEFAULT_LOGO = null; // filled from template fetch below
             let iconData = null;        // user-uploaded icon as data URL
             let templateHtml = '';      // top-right.html source, fetched once
-            let logoImage = new Image(); // logo drawn on the canvas (set when an icon is uploaded)
+            let defaultLogo = '';       // default logo (from the template)
+            let logoImage = new Image(); // logo drawn on the canvas
 
             const fPlayer = $('fPlayer'), fCallsign = $('fCallsign'), fAgency = $('fAgency'), fIcon = $('fIcon');
             const bcam = $('bcam'), bcamImg = $('bcamImg'), bcamLogo = $('bcamLogo');
@@ -236,7 +237,7 @@
             // icon upload
             fIcon.addEventListener('change', () => {
                 const file = fIcon.files[0];
-                if (!file) { iconData = null; bcamImg.removeAttribute('src'); bcamLogo.style.display = 'none'; logoImage = new Image(); return; }
+                if (!file) { iconData = null; bcamImg.src = defaultLogo; logoImage = new Image(); logoImage.src = defaultLogo; bcamLogo.style.display = defaultLogo ? 'block' : 'none'; return; }
                 const r = new FileReader();
                 r.onload = () => {
                     iconData = r.result;
@@ -253,6 +254,14 @@
                 .then(r => r.text())
                 .then(t => {
                     templateHtml = t;
+                    const m = t.match(/src="(data:image\/png;base64,[^"]+)"/);
+                    if (m) {
+                        defaultLogo = m[1];
+                        logoImage = new Image();
+                        logoImage.src = defaultLogo;
+                        bcamImg.src = defaultLogo;
+                        bcamLogo.style.display = 'block';
+                    }
                     refreshPreview();
                 })
                 .catch(() => { refreshPreview(); });
@@ -271,9 +280,7 @@
                 out = out.replace(/const agency = "[^"]*";/, 'const agency = "' + escJs(fAgency.value || 'AGENCY') + '";');
                 out = out.replace(/const callsign = "[^"]*";/, 'const callsign = "' + escJs(fCallsign.value || '[000]') + '";');
                 if (iconData) {
-                    out = out.replace('<!--LOGO-->', '<img src="' + iconData + '" width="64" height="64" border="0" alt="logo">');
-                } else {
-                    out = out.replace('<!--LOGO-->', '');
+                    out = out.replace(/src="data:image\/png;base64,[^"]*"/, 'src="' + iconData + '"');
                 }
                 // drop the 21MB beep audio so the single downloaded file works standalone
                 out = out.replace(/<audio[\s\S]*?<\/audio>/, '<!-- beep audio omitted; add double-beep.wav back if you want sound -->');
