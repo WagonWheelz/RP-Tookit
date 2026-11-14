@@ -1,0 +1,88 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generic Agency</title>
+  <link rel="icon" href="../Assets/favicon.png" type="image">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    .options { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; margin-bottom: 24px; }
+    .options label, .options .option { display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #ffffff; }
+    .options input[type="color"] { width: 72px; height: 40px; padding: 2px; border: 1px solid #2a211e; background: #ffffff; cursor: pointer; }
+    .options input[type="file"] { color: #ffffff; font-family: inherit; }
+    .options .row.ranks { margin-bottom: 0; justify-content: flex-start; }
+    .logo-message { color: #f87171; margin: -12px 0 24px; min-height: 1.2em; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <div class="overlay">
+    <header class="topbar">
+      <div class="wrap topbar-main">
+        <span class="mark">GEN</span>
+        <span class="brand-name">Generic Agency</span>
+        <span class="spacer"></span>
+        <a class="home" href="../index.html">Back to toolkit</a>
+      </div>
+      <nav class="wrap nav-links" aria-label="Creators">
+            <a class="nav-link" href="./generic.html">Overview</a>
+            <a class="nav-link" href="./title.html">Title</a>
+            <a class="nav-link" href="./signature.html">Signature</a>
+            <a class="nav-link active" href="./header.html">Header</a></nav>
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+      <div>
+        <canvas class="canvas my-5"></canvas>
+      </div>
+
+      <!-- Colours -->
+      <form class="options colours">
+        <label>Primary colour
+          <input type="color" name="primary" value="#1f49d1">
+        </label>
+        <label>Shade colour
+          <input type="color" name="shade" value="#011468">
+        </label>
+        <label>Text colour
+          <input type="color" name="text" value="#ffffff">
+        </label>
+        <div class="option">Bottom band
+          <!-- reuses the rank-button styling -->
+          <div class="row ranks bands">
+            <input type="button" name="gold" value="Gold" class="btn-active">
+            <input type="button" name="silver" value="Silver">
+            <input type="button" name="none" value="None">
+          </div>
+        </div>
+      </form>
+
+      <!-- Logo -->
+      <div class="options">
+        <label>Logo / badge (PNG with a transparent background works best)
+          <input type="file" class="logo-file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+        </label>
+        <button type="button" class="btn logo-remove" hidden>Remove logo</button>
+      </div>
+      <p class="logo-message"></p>
+
+      <form class="inputs my-4 form-group d-flex justify-content-center align-content-center flex-column text-center">
+        <label>Company name</label>
+        <input type="text" class="form-control" name="company" spellcheck="false">
+        <label>Header</label>
+        <input type="text" class="form-control" name="header" spellcheck="false">
+        <label>Subheader (Optional)</label>
+        <input type="text" class="form-control" name="subheader" spellcheck="false">
+      </form>
+
+    </div>
+  </div>
+
+
+  <script src="./js/header.js"></script>
+  </body>
+
+</html>
