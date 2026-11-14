@@ -5,7 +5,7 @@
 @font-face { font-family: 'Carlito'; src: url('./fonts/Carlito-Bold.ttf'); font-weight: bold; font-style: normal; }
 
 :root {
-  --bg: #0e0b0a;
+  --bg: #0b0e15;
   --line: #2a211e;
   --text: #ece7e3;
   --muted: #9a8f89;
@@ -14,7 +14,7 @@
 
 body {
   font-family: 'Source Sans Pro', sans-serif;
-  background: var(--bg);
+  background: radial-gradient(1000px 520px at 50% -10%, rgba(59,130,246,0.10), transparent 62%), var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
