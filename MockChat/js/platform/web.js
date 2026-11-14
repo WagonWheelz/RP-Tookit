@@ -404,6 +404,7 @@
     // exports run in this page — see js/export/webexport.js
     exportImage: (opts) => window.WebExport.image(opts, emit),
     exportVideo: (opts) => window.WebExport.video(opts, emit),
+    exportPageVideo: (opts) => window.WebExport.pageVideo(opts, emit),
     exportAnimated: (opts) => window.WebExport.animated(opts, emit),
     cancelExport: () => window.WebExport.cancel(),
     onExportProgress: (cb) => bus.addEventListener('export:progress', (e) => cb(e.detail)),

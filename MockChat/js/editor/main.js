@@ -83,6 +83,17 @@
   // keystroke — a long conversation in step view is a lot to lay out.
   const previewSoon = () => { clearTimeout(previewTimer); previewTimer = setTimeout(() => { E.renderPreview(); }, 90); };
 
+  // where the watch page's clip is parked. The still export and any remount
+  // read this, so the frame on screen is the frame that gets exported.
+  document.addEventListener('yt:seek', (e) => {
+    const p = E.project;
+    if (!p || !S.isStatic || !S.isStatic(p.platform)) return;
+    p.chat.yt = p.chat.yt || {};
+    p.chat.yt.at = Math.max(0, Number(e.detail && e.detail.t) || 0);
+    E.dirty = true;
+    if (E.paintTransport) E.paintTransport();
+  });
+
   document.addEventListener('input', (e) => {
     const el = e.target;
     if (!el.dataset || !el.dataset.path) return;

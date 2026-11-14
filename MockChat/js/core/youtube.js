@@ -39,6 +39,18 @@
     return s;
   };
 
+  // "12:34" / "1:02:03" -> seconds, and back again for the readout
+  function durSecs(txt) {
+    const m = String(txt || '').match(/^(\d+):([0-5]?\d)(?::([0-5]?\d))?$/);
+    if (!m) return 0;
+    return m[3] != null ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
+  }
+  function fmtTime(sec, round) {
+    const s = Math.max(0, round ? Math.round(Number(sec) || 0) : Math.floor(Number(sec) || 0));
+    const m = Math.floor(s / 60);
+    return m + ':' + String(s % 60).padStart(2, '0');
+  }
+
   // --------------------------------------------------------------- defaults
   function defaultYT() {
     return {
@@ -52,6 +64,7 @@
       description: 'The description sits under the action buttons. Put the video blurb, the links, the timestamps and the credits here — the mockup keeps the same collapsed height so the layout never shifts.',
       comments: '2,418',
       duration: '12:34',
+      at: 0,                 // seconds into the clip — the frame the page shows
       video: null,           // media ref — plays in the player when set
       thumb: null,           // media ref — poster / thumbnail
       avatar: null,          // media ref — channel picture
@@ -132,6 +145,8 @@
     const poster = src(d.thumb);
     const videoSrc = src(d.video);
 
+    let clipEl = null;             // the <video> behind the canvas, when there is one
+
     if (videoSrc && isVideo(d.video)) {
       // Draw the clip into a canvas instead of putting a <video> on the page.
       // The exporter serialises this page into an SVG image, and a <video>
@@ -146,7 +161,6 @@
       clip.src = videoSrc;
       clip.muted = true;
       clip.loop = true;
-      clip.autoplay = true;
       clip.playsInline = true;
       clip.setAttribute('muted', '');
       clip.setAttribute('playsinline', '');
@@ -163,6 +177,18 @@
       // export's offscreen host) never fires animation frames
       const timer = setInterval(paint, 120);
       clip.addEventListener('emptied', () => clearInterval(timer));
+
+      // Land on the frame the project remembers. `at` is stored, so a remount
+      // (an export, or a re-render after an edit) shows the same frame the
+      // editor was looking at instead of snapping back to the first one.
+      const at0 = Math.max(0, Number(d.at) || 0);
+      const seekTo = (t) => { try { clip.currentTime = Math.max(0, t); } catch (e) {} };
+      // 0.001 rather than 0: setting the same time does not decode a frame, and
+      // a never-played clip has none to draw yet
+      const park = () => seekTo(at0 > 0 ? at0 : 0.001);
+      clip.addEventListener('loadedmetadata', park, { once: true });
+      if (clip.readyState >= 1) park();
+      clipEl = clip;
       paint();
     } else if (poster) {
       const img = el('img', 'yt-media');
@@ -176,8 +202,10 @@
     // control bar: timeline + the row of buttons along the bottom
     const ctrls = el('div', 'yt-ctrls');
     const track = el('div', 'yt-track');
-    track.appendChild(el('div', 'yt-track-fill'));
-    track.appendChild(el('div', 'yt-track-dot'));
+    const fill = el('div', 'yt-track-fill');
+    const dot = el('div', 'yt-track-dot');
+    track.appendChild(fill);
+    track.appendChild(dot);
     ctrls.appendChild(track);
 
     const row = el('div', 'yt-ctrl-row');
@@ -188,8 +216,53 @@
     next.appendChild(icon(['M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z']));
     const vol = el('button', 'yt-icon yt-sm');
     vol.appendChild(icon(['M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12z']));
-    const time = el('span', 'yt-time', '0:00 / ' + (d.duration || '0:00'));
+    const time = el('span', 'yt-time', '');
     left.appendChild(play); left.appendChild(next); left.appendChild(vol); left.appendChild(time);
+
+    // readout + bar follow the clip; with no clip they show the typed duration
+    const totalOf = () => {
+      if (clipEl && isFinite(clipEl.duration) && clipEl.duration > 0) return clipEl.duration;
+      return durSecs(d.duration) || 0;
+    };
+    const sync = () => {
+      const total = totalOf();
+      const t = clipEl ? Math.min(clipEl.currentTime || 0, total || 1e9) : 0;
+      time.textContent = fmtTime(t) + ' / ' + fmtTime(total, true);
+      const p = total > 0 ? Math.max(0, Math.min(1, t / total)) : 0;
+      fill.style.right = ((1 - p) * 100) + '%';
+      dot.style.left = (p * 100) + '%';
+    };
+    sync();
+    if (clipEl) ['timeupdate', 'seeked', 'loadedmetadata', 'play', 'pause'].forEach(e2 => clipEl.addEventListener(e2, sync));
+
+    play.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!clipEl) return;
+      if (clipEl.paused) clipEl.play().catch(() => {}); else clipEl.pause();
+    });
+
+    // the bar is draggable: it seeks the clip, and tells the editor which frame
+    // it is on so an exported still matches what you see
+    let draggingTrack = false;
+    const seekFromTrack = (e) => {
+      const r = track.getBoundingClientRect();
+      if (!r.width) return;
+      const p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      const total = totalOf();
+      if (clipEl && total > 0) { try { clipEl.currentTime = p * total; } catch (err) {} }
+      sync();
+      const pageEl = track.closest('.yt-page');
+      if (pageEl) pageEl.dispatchEvent(new CustomEvent('yt:seek', { bubbles: true, detail: { t: p * total } }));
+    };
+    track.addEventListener('pointerdown', (e) => {
+      draggingTrack = true;
+      try { track.setPointerCapture(e.pointerId); } catch (err) {}
+      seekFromTrack(e);
+      e.stopPropagation();
+    });
+    track.addEventListener('pointermove', (e) => { if (draggingTrack) seekFromTrack(e); });
+    track.addEventListener('pointerup', () => { draggingTrack = false; });
+    track.addEventListener('pointercancel', () => { draggingTrack = false; });
 
     const right = el('div', 'yt-ctrl-right');
     ['CC', '⚙', '⛶'].forEach(glyph => right.appendChild(el('button', 'yt-icon yt-sm yt-glyph', glyph)));
@@ -327,5 +400,52 @@
     return page;
   }
 
-  window.YouTubeUI = { body, defaultYT, data };
+  // Called by the exporters once the page is mounted off-screen. The mount is
+  // what decides the frame, but a seek is asynchronous and the snapshot does
+  // not wait for it on its own — so an export used to come out on frame 0
+  // whatever the editor was showing.
+  async function still(container, project) {
+    const d = data(project);
+    const clip = container.querySelector('video.yt-clip');
+    if (!clip || !isVideo(d.video)) return false;
+    const at = Math.max(0, Number(d.at) || 0);
+
+    const seeked = () => new Promise((res) => {
+      let done = false;
+      const fin = () => { if (done) return; done = true; clip.removeEventListener('seeked', fin); res(); };
+      clip.addEventListener('seeked', fin);
+      setTimeout(fin, 4000);
+    });
+
+    if (clip.readyState < 1) {
+      await new Promise((res) => {
+        let done = false;
+        const fin = () => { if (done) return; done = true; clip.removeEventListener('loadedmetadata', fin); res(); };
+        clip.addEventListener('loadedmetadata', fin);
+        setTimeout(fin, 6000);
+      });
+    }
+    try { clip.pause(); } catch (e) {}
+    if (clip.readyState < 2) {
+      await new Promise((res) => {
+        let done = false;
+        const fin = () => { if (done) return; done = true; clip.removeEventListener('loadeddata', fin); res(); };
+        clip.addEventListener('loadeddata', fin);
+        setTimeout(fin, 6000);
+      });
+    }
+    if (Math.abs((clip.currentTime || 0) - at) > 0.02 || !clip.videoWidth) {
+      const p = seeked();
+      try { clip.currentTime = at > 0 ? at : 0.001; } catch (e) {}
+      await p;
+    }
+    // and paint it once more, synchronously, so the canvas is current
+    const canvas = container.querySelector('canvas.yt-media');
+    if (canvas && clip.videoWidth) {
+      try { canvas.getContext('2d').drawImage(clip, 0, 0, canvas.width, canvas.height); } catch (e) {}
+    }
+    return true;
+  }
+
+  window.YouTubeUI = { body, defaultYT, data, still };
 })();

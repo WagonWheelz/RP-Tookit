@@ -66,14 +66,28 @@
     // the recording plays every scene, so the gate and the label have to
     // measure the whole sequence, not just the one you happen to be standing on
     const total = window.ScenePlayer.totalDuration(E.project);
+    // A watch page has no animation to record, but it does have a clip: the
+    // export burns that clip into the page and writes a real MP4.
     if (S.isStatic && S.isStatic(E.project.platform)) {
-      return E.toast('This page is a still — use Export image.', 'err');
-    }
-    if (S.isStatic && S.isStatic(E.project.platform)) {
-      return E.toast('This page is a still — use Export image.', 'err');
-    }
-    if (S.isStatic && S.isStatic(E.project.platform)) {
-      return E.toast('This page is a still — use Export image.', 'err');
+      if (!E.project.chat.yt || !E.project.chat.yt.video) {
+        return E.toast('Attach a video clip first — the page has nothing to play.', 'err');
+      }
+      const rp = S.resolveScale(E.project, E.project.exportOpts.vidRes);
+      busy(true, 'Rendering the clip…');
+      let res2;
+      try {
+        res2 = await window.api.exportPageVideo({
+          project: packed(),
+          scale: rp.scale,
+          fps: Number(E.project.exportOpts.fps) || 30,
+          bitrate: Math.round((Number(E.project.exportOpts.bitrate) || 12) * 1000000),
+          fileName: E.project.exportOpts.name
+        });
+      } catch (err) { res2 = { ok: false, error: String(err && err.message || err) }; }
+      busy(false);
+      if (res2.cancelled) return E.toast('Export cancelled');
+      if (!res2.ok) return E.toast('Export failed: ' + res2.error, 'err');
+      return E.toast('MP4 saved — ' + res2.width + '×' + res2.height + ', ' + ((res2.duration || 0) / 1000).toFixed(1) + 's');
     }
     if (total < 300) { E.toast('Nothing to animate — add some messages first.', 'err'); return; }
     const r = S.resolveScale(E.project, E.project.exportOpts.vidRes);
@@ -96,6 +110,10 @@
   E.exportAnimated = async function () {
     if (busyNow) return;
     if (E.isPlaying()) E.stopPlayback();
+    // a watch page is a still with a clip: there is no animation to capture
+    if (S.isStatic && S.isStatic(E.project.platform)) {
+      return E.toast('A watch page exports as an image or an MP4 — not an animated GIF.', 'err');
+    }
     const total = window.ScenePlayer.totalDuration(E.project);
     if (total < 300) { E.toast('Nothing to animate — add some messages first.', 'err'); return; }
     const eo = E.project.exportOpts;

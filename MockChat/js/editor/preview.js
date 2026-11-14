@@ -80,6 +80,25 @@
   const ICON_PLAY = html`${SVG}<path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6z"/></svg>`;
   const ICON_STOP = html`${SVG}<rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>`;
 
+  // ------------------------------------------------------- page playback
+  // A watch page has no steps, so the transport drives the clip in it: play and
+  // pause, step a frame at a time, and a readout that follows the clip.
+  const isPage = () => !!(S.isStatic && S.isStatic(E.project.platform));
+  const pageClip = () => document.querySelector('#preview video.yt-clip');
+  const pageTotal = () => { const c = pageClip(); return (c && isFinite(c.duration) && c.duration > 0) ? c.duration : 0; };
+  const pageAt = () => { const c = pageClip(); return c ? (c.currentTime || 0) : 0; };
+  const fmtSec = (s, round) => {
+    const n = Math.max(0, round ? Math.round(Number(s) || 0) : Math.floor(Number(s) || 0));
+    return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  };
+  const pageSeek = (t) => {
+    const c = pageClip();
+    if (!c) return;
+    try { c.currentTime = Math.max(0, Math.min(pageTotal() || 0, t)); } catch (e) {}
+    const pageEl = document.querySelector('#preview .yt-page');
+    if (pageEl) pageEl.dispatchEvent(new CustomEvent('yt:seek', { bubbles: true, detail: { t: c.currentTime } }));
+  };
+
   function paintTransport() {
     const at = E.previewAt();
     const btnAll = $('#tpPlay'), btnScene = $('#tpScene');
@@ -91,6 +110,18 @@
     $('#tpNext').disabled = !!playing;
     $('#tpStep').classList.toggle('on', E.stepView);
     const read = $('#tpRead');
+    if (isPage()) {
+      const c = pageClip();
+      const total = pageTotal();
+      btnAll.classList.toggle('on', !!(c && !c.paused));
+      btnScene.disabled = !c;
+      $('#tpPrev').disabled = !c;
+      $('#tpNext').disabled = !c;
+      $('#tpStep').disabled = true;
+      read.textContent = c ? ('clip · ' + fmtSec(pageAt()) + ' / ' + fmtSec(total, true)) : 'no clip attached';
+      return;
+    }
+    $('#tpStep').disabled = false;
     if (playing) read.textContent = playing === 'all' ? 'playing all' : 'previewing scene';
     else if (at && at.step >= 0) read.textContent = 'step ' + (at.step + 1) + '/' + at.of + ' · ' + (at.ms / 1000).toFixed(1) + 's';
     else read.textContent = at ? 'whole scene · ' + (at.total / 1000).toFixed(1) + 's' : 'revisit';
@@ -167,12 +198,31 @@
     paintTransport();
   }
 
-  E.playAll = () => (player ? E.stopPlayback() : start('all'));
-  E.previewScene = () => (player ? E.stopPlayback() : start('scene'));
+  E.playAll = () => {
+    if (isPage()) {
+      const c = pageClip();
+      if (!c) return E.toast('Attach a video clip first', 'err');
+      if (c.paused) { c.play().catch(() => {}); } else { c.pause(); }
+      paintTransport();
+      return;
+    }
+    return (player ? E.stopPlayback() : start('all'));
+  };
+  E.previewScene = () => {
+    if (isPage()) { pageSeek(0); paintTransport(); return; }
+    return (player ? E.stopPlayback() : start('scene'));
+  };
 
   // Walk the selection through the messages, across scene boundaries.
   E.step = function (dir) {
     const p = E.project;
+    if (isPage()) {
+      const fps = Number(E.project.exportOpts.fps) || 30;
+      pageClip() && pageClip().pause();
+      pageSeek(pageAt() + dir / fps);
+      paintTransport();
+      return;
+    }
     if (player) E.stopPlayback();
     const i = E.indexOfSel();
     const j = i + dir;

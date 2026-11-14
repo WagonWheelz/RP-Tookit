@@ -374,6 +374,10 @@
     try {
       emit('export:progress', { p: 0.1 });
       window.ScenePlayer.mountStatic(inner, project, project.active || 0, opts.atMs);
+      // a page owns a clip: let it park on the stored frame before the snapshot
+      if (window.YouTubeUI && window.YouTubeUI.still) {
+        try { await window.YouTubeUI.still(inner, project); } catch (e) {}
+      }
       await settle(inner);
       emit('export:progress', { p: 0.4 });
       const canvas = await snapshot(stage, o, Math.max(0.25, Number(opts.scale) || 2), await fontCSSFor(project));
@@ -506,8 +510,166 @@
     }
   }
 
+  // ------------------------------------------------------------ page video
+  // A watch page is a still with one clip inside it, so its video export is
+  // not the animation recorder: the page is painted once, the clip is seeked
+  // frame by frame over its whole length, and the pieces are composited and
+  // encoded to MP4 (H.264, falling back to VP9 in an MP4 container).
+
+  // "12:34" / "1:02:03" -> seconds
+  function parseDur(txt) {
+    const m = String(txt || '').match(/^(\d+):([0-5]?\d)(?::([0-5]?\d))?$/);
+    if (!m) return 0;
+    return m[3] != null ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
+  }
+
+  function seekClip(v, t) {
+    return new Promise((resolve) => {
+      let done = false;
+      const fin = () => { if (done) return; done = true; v.removeEventListener('seeked', fin); resolve(); };
+      v.addEventListener('seeked', fin);
+      setTimeout(fin, 1200);
+      try { v.currentTime = t; } catch (e) { fin(); }
+    });
+  }
+
+  async function pickMp4Codec(W, H, fps, bitrate) {
+    // H.264 first, at every level from baseline to 4K — a baseline profile is
+    // rejected above roughly 720p, and the fallback was landing on VP9-in-MP4,
+    // which plenty of editors will not open.
+    const tries = [
+      { codec: 'avc1.640042', mux: 'avc', avc: true },   // high, level 4.2 (4K)
+      { codec: 'avc1.640034', mux: 'avc', avc: true },   // high, level 5.2
+      { codec: 'avc1.640032', mux: 'avc', avc: true },   // high, level 5.0
+      { codec: 'avc1.640028', mux: 'avc', avc: true },   // high, level 4.0 (1080p)
+      { codec: 'avc1.4d002a', mux: 'avc', avc: true },   // main, level 4.2
+      { codec: 'avc1.42001f', mux: 'avc', avc: true },   // baseline, level 3.1 (720p)
+      { codec: 'vp09.00.10.08', mux: 'vp9', avc: false }
+    ];
+    for (const c of tries) {
+      try {
+        const r = await window.VideoEncoder.isConfigSupported({ codec: c.codec, width: W, height: H, bitrate, framerate: fps });
+        if (r && r.supported) return c;
+      } catch (e) { /* try the next one */ }
+    }
+    return null;
+  }
+
+  async function pageVideo(opts, emit) {
+    cancelled = false;
+    if (typeof window.VideoEncoder !== 'function') {
+      return { ok: false, error: 'Video export needs Chrome or Edge. PNG works in every browser.' };
+    }
+    if (!window.Mp4Muxer) return { ok: false, error: 'The MP4 muxer did not load — reload the page.' };
+
+    const project = S().migrate(opts.project);
+    await window.MediaRef.prepare(project);
+    const fps = Math.max(1, Math.min(60, Number(opts.fps) || 30));
+    const scale = Math.max(0.25, Number(opts.scale) || 1);
+    const o = S().outerSize(project);
+    const W = even(o.w * scale), H = even(o.h * scale);
+    const bitrate = Number(opts.bitrate) || 12000000;
+
+    const scene = (S().resolveScene && S().resolveScene(project, project.active || 0)) || project.scenes[0];
+    const yt = (scene.chat && scene.chat.yt) || {};
+    if (!yt.video) return { ok: false, error: 'Attach a video clip first — the page has nothing to play.' };
+    const secs = Math.max(0.5, Number(yt.video.secs) || parseDur(yt.duration) || 10);
+
+    const { host, stage, inner } = makeHost(project);
+    let enc = null;
+    try {
+      emit('export:progress', { p: 0.02, label: 'Painting the page…' });
+      window.ScenePlayer.mountStatic(inner, project, project.active || 0, null);
+      await settle(inner);
+
+      const page = inner.querySelector('.yt-page');
+      const clip = inner.querySelector('video.yt-clip');
+      const stageEl = inner.querySelector('.yt-stage');
+      const ctrlsEl = inner.querySelector('.yt-ctrls');
+      const canvasEl = inner.querySelector('canvas.yt-media');
+      if (!page || !clip || !stageEl) return { ok: false, error: 'The watch page did not render its player.' };
+      if (!clip.videoWidth) await once(clip, 'loadeddata', 6000);
+      try { clip.pause(); } catch (e) {}
+
+      const pr = page.getBoundingClientRect();
+      const rel = (el) => { const r = el.getBoundingClientRect();
+        return { x: r.left - pr.left, y: r.top - pr.top, w: r.width, h: r.height }; };
+      const sr = rel(stageEl);
+      const cr = ctrlsEl ? rel(ctrlsEl) : null;
+
+      // the page without the clip (so the frame drawn under the controls is
+      // the page itself), then the control bar on its own
+      const hide = [canvasEl, clip].filter(Boolean);
+      hide.forEach(el => { el.dataset.wasVis = el.style.visibility; el.style.visibility = 'hidden'; });
+      const baseCv = await snapshot(stage, o, scale, await fontCSSFor(project));
+      hide.forEach(el => { el.style.visibility = el.dataset.wasVis || ''; });
+      const ctrlsCv = (ctrlsEl && cr && cr.w > 0)
+        ? await window.htmlToImage.toCanvas(ctrlsEl, {
+            width: Math.round(cr.w), height: Math.round(cr.h), pixelRatio: scale, skipFonts: true
+          })
+        : null;
+
+      const codec = await pickMp4Codec(W, H, fps, bitrate);
+      if (!codec) return { ok: false, error: 'This browser cannot encode video at ' + W + '×' + H + '. Try a lower resolution.' };
+
+      const muxer = new window.Mp4Muxer.Muxer({
+        target: new window.Mp4Muxer.ArrayBufferTarget(),
+        video: { codec: codec.mux, width: W, height: H, frameRate: fps },
+        fastStart: 'in-memory',
+        firstTimestampBehavior: 'offset'
+      });
+      let failure = null;
+      enc = new window.VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+        error: (e) => { failure = e; }
+      });
+      enc.configure({
+        codec: codec.codec, width: W, height: H, bitrate, framerate: fps,
+        avc: codec.avc ? { format: 'avc' } : undefined,
+        latencyMode: 'quality'
+      });
+
+      const target = document.createElement('canvas');
+      target.width = W;
+      target.height = H;
+      const g = target.getContext('2d', { alpha: false });
+      const frames = Math.max(1, Math.round(secs * fps));
+      const frameUs = 1e6 / fps;
+
+      for (let i = 0; i < frames; i++) {
+        if (cancelled) throw CANCEL;
+        if (failure) throw failure;
+        await seekClip(clip, Math.min(secs - 0.001, i / fps));
+        g.fillStyle = '#000';
+        g.fillRect(0, 0, W, H);
+        g.drawImage(baseCv, 0, 0, W, H);
+        try { g.drawImage(clip, sr.x * scale, sr.y * scale, sr.w * scale, sr.h * scale); } catch (e) {}
+        if (ctrlsCv) g.drawImage(ctrlsCv, cr.x * scale, cr.y * scale, cr.w * scale, cr.h * scale);
+        const vf = new window.VideoFrame(target, { timestamp: Math.round(i * frameUs), duration: Math.round(frameUs) });
+        try { enc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); } finally { vf.close(); }
+        while (enc.encodeQueueSize > 4) await sleep(4);
+        if (i % 5 === 0) emit('export:progress', { p: 0.04 + 0.9 * (i / frames), label: 'Rendering frame ' + (i + 1) + ' of ' + frames + '…' });
+      }
+
+      emit('export:progress', { p: 0.98, label: 'Writing the MP4…' });
+      await enc.flush();
+      if (failure) throw failure;
+      muxer.finalize();
+      const file = safeName(opts.fileName) + '.mp4';
+      window.api.deliver(file, new Blob([muxer.target.buffer], { type: 'video/mp4' }));
+      emit('export:progress', { p: 1 });
+      return { ok: true, file, width: W, height: H, duration: Math.round(secs * 1000), frames, codec: codec.codec };
+    } catch (err) {
+      if (err === CANCEL) return { cancelled: true };
+      return fail(err);
+    } finally {
+      if (enc && enc.state !== 'closed') { try { enc.close(); } catch (e) {} }
+      host.remove();
+    }
+  }
+
   window.WebExport = {
-    image, animated, video,
+    image, animated, video, pageVideo,
     cancel() { cancelled = true; }
   };
 })();
