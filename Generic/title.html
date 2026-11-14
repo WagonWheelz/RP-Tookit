@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generic Faction - Title Creator</title>
+    <link rel="icon" href="../Assets/favicon.png" type="image">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="wrap topbar-main">
+            <span class="mark">GENERIC</span>
+            <span class="brand-name">Generic Faction</span>
+            <span class="spacer"></span>
+            <a class="home" href="../index.html">Back to toolkit</a>
+        </div>
+        <nav class="wrap nav-links" aria-label="Creators">
+            <a class="nav-link" href="./generic.html">Overview</a>
+            <a class="nav-link active" href="./title.html">Title</a>
+        </nav>
+    </header>
+
+    <main class="wrap">
+        <h1 class="page-title">Title creator</h1>
+        <p class="page-sub">Your own title bar: pick a colour for the gradient, or supply a 1920x65 image.</p>
+
+        <canvas class="canvas" aria-label="Title preview"></canvas>
+
+        <div class="inputs" style="margin-top: 32px;">
+
+            <label for="titleText">Title / separator</label>
+            <input id="titleText" type="text" class="form-control" spellcheck="false" placeholder="YOUR FACTION">
+
+            <div class="bg-controls">
+                <div class="bg-field">
+                    <label for="titleColour">Background colour</label>
+                    <input id="titleColour" type="color" value="#facc15">
+                </div>
+                <div class="bg-field">
+                    <label for="bgFile">Background image (1920x65)</label>
+                    <input id="bgFile" type="file" accept="image/png,image/jpeg">
+                </div>
+                <div class="bg-field">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button id="bgRemove" class="btn" type="button" hidden>Use colour instead</button>
+                </div>
+            </div>
+
+            <p id="bgMsg" class="bg-msg">Using the colour gradient.</p>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap">
+            <span>Remake by WagonWheel.</span>
+            <span>GPL v2.</span>
+        </div>
+    </footer>
+
+    <script src="./js/title.js"></script>
+</body>
+</html>
