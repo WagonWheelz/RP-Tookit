@@ -3,233 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParadiseRP Signature Creator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>RP-Toolkit - Signature Creators &amp; Content Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="icon" href="./Assets/favicon.png" type="image">
     <style>
-        /* --- CORE STYLES --- */
         :root {
-            --bg-color: #0f1115;
-            --card-bg: #1a1d24;
-            --text-main: #ffffff;
-            --text-black: #000000;
-            --text-sub: #a1a1a6;
-            --accent-police: #3b82f6; /* Blue */
-            --accent-ems: #ef4444;    /* Red */
-            --accent-doc: #10b981;    /* Green */
-            --accent-bcso: #d4af37;   /* Gold/Tan for Sheriff */
-            --accent-doj: #9ca3af;    /* Silver/Grey */
-            --accent-lsc: #1b165c;    /* LSC Purple */ 
-            --accent-weazel: #ffffff;    /* Plain */ 
+            --bg: #0f1115;
+            --bg-soft: #13161c;
+            --card: #1a1d24;
+            --card-hover: #20242d;
+            --line: #2a2f3a;
+            --text: #ffffff;
+            --sub: #9aa0ab;
+            --dim: #6b7280;
 
+            --police: #3b82f6;
+            --ems: #ef4444;
+            --lsc: #6d5cff;
+            --weazel: #e5e7eb;
+
+            --mockchat: #22c55e;
+            --chasecam: #f59e0b;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(59, 130, 246, 0.04), transparent 60%),
+                radial-gradient(900px 500px at 90% 0%, rgba(245, 158, 11, 0.03), transparent 55%),
+                var(--bg);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
-        /* --- HEADER SECTION --- */
+        a { text-decoration: none; }
+
+        /* ---------- HEADER ---------- */
         header {
             text-align: center;
-            padding: 40px 20px 40px;
-            max-width: 800px;
+            padding: 56px 24px 32px;
+            max-width: 860px;
         }
-
-        .logo-container {
-            margin-bottom: 20px;
-        }
-
+        .logo-container { margin-bottom: 22px; }
         .logo-container img {
-            max-width: 250px; /* Increased slightly for the Paradise RP logo */
+            max-width: 220px;
             height: auto;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+            filter: drop-shadow(0 0 14px rgba(255,255,255,0.12));
         }
-
         h1 {
             font-family: 'Oswald', sans-serif;
-            font-size: 3.5rem;
+            font-size: clamp(2.4rem, 5vw, 3.4rem);
+            font-weight: 700;
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 2px;
-            background: linear-gradient(to right, #ffffff, #9ca3af);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #f2f2f2;
         }
-
         p.subtitle {
-            color: var(--text-sub);
-            font-size: 1.2rem;
+            color: var(--sub);
+            font-size: 1.05rem;
+            font-weight: 300;
             margin-top: 10px;
         }
 
-        /* --- CARD GRID --- */
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            padding: 20px;
-            max-width: 1200px;
+        /* ---------- LAYOUT ---------- */
+        .page {
             width: 100%;
-            margin-bottom: 60px;
+            max-width: 1180px;
+            padding: 0 24px 40px;
         }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            width: 300px;
-            padding: 30px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #333;
+        section { margin-bottom: 48px; }
+
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .section-head .bar {
+            width: 4px;
+            height: 26px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #3b82f6, #f59e0b);
+        }
+        .section-head h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+        .section-head .tag {
+            margin-left: auto;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--dim);
+            border: 1px solid var(--line);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        /* ---------- FEATURED TOOLS ---------- */
+        .featured {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .feature {
+            position: relative;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 30px 30px 26px;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
-
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .feature::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--acc);
         }
-
-        .icon-box {
-            font-size: 3rem;
-            margin-bottom: 20px;
+        .feature:hover {
+            transform: translateY(-6px);
+            border-color: var(--acc);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.45);
         }
+        .feature.mockchat { --acc: var(--mockchat); }
+        .feature.chasecam { --acc: var(--chasecam); }
 
-        h2 {
+        .feature .f-icon {
+            width: 58px; height: 58px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #0b0d10;
+            background: var(--acc);
+            margin-bottom: 18px;
+        }
+        .feature h3 {
             font-family: 'Oswald', sans-serif;
-            margin: 10px 0;
-            font-size: 1.8rem;
-            text-transform: uppercase;
-        }
-
-        p.desc {
-            color: var(--text-sub);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 25px;
-        }
-
-        p.desc-black {
-            color: var(--text-black);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 25px;
-        }
-
-
-        /* --- BUTTONS --- */
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
+            font-size: 1.6rem;
+            margin: 0 0 6px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: opacity 0.2s;
-            color: white;
         }
-
-        /* --- BUTTONS --- */
-        .btn-black {
-            display: inline-block;
-            padding: 12px 25px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: opacity 0.2s;
-            color: rgb(0, 0, 0);
-        }        
-
-        .btn:hover {
-            opacity: 0.8;
+        .feature .f-sub {
+            color: var(--sub);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin: 0 0 18px;
         }
-
-        /* --- FACTION SPECIFIC STYLES --- */
-        .card.police { border-top: 4px solid var(--accent-police); }
-        .card.police .icon-box { color: var(--accent-police); }
-        .card.police .btn { background-color: var(--accent-police); }
-
-        .card.ems { border-top: 4px solid var(--accent-ems); }
-        .card.ems .icon-box { color: var(--accent-ems); }
-        .card.ems .btn { background-color: var(--accent-ems); }
-
-        .card.doj { border-top: 4px solid var(--accent-doj); }
-        .card.doj .icon-box { color: var(--accent-doj); }
-        .card.doj .btn { background-color: var(--accent-doj); }
-
-        .card.bcso { border-top: 4px solid var(--accent-bcso); }
-        .card.bcso .icon-box { color: var(--accent-bcso); }
-        .card.bcso .btn { background-color: var(--accent-bcso); }
-
-        .card.doc { border-top: 4px solid var(--accent-doc); }
-        .card.doc .icon-box { color: var(--accent-doc); }
-        .card.doc .btn { background-color: var(--accent-doc); }
-
-        .card.lsc { border-top: 4px solid var(--accent-lsc); }
-        .card.lsc .icon-box { color: var(--accent-lsc); }
-        .card.lsc .btn { background-color: var(--accent-lsc); }
-
-        .card.weazel { border-top: 4px solid var(--accent-weazel); }
-        .card.weazel .icon-box { color: var(--accent-weazel); }
-        .card.weazel .btn-black { background-color: var(--accent-weazel); }
-
-        /* --- FOOTER --- */
-        footer {
-            width: 100%;
-            background-color: #16191f;
-            margin-top: auto;
-            padding: 40px 0;
-            border-top: 1px solid #222;
+        .feature ul {
+            list-style: none;
+            margin: 0 0 24px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            flex: 1;
+        }
+        .feature ul li {
+            color: var(--sub);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature ul li i {
+            color: var(--acc);
+            width: 16px;
             text-align: center;
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        .f-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.2s, transform 0.2s;
+            cursor: pointer;
+            color: #0b0d10;
+        }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn.primary { background: var(--acc); }
+        .btn.ghost {
+            background: transparent;
+            color: var(--sub);
+            border: 1px solid var(--line);
+        }
+        .btn.ghost:hover { color: var(--text); border-color: var(--dim); }
+
+        .pill {
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            color: #0b0d10;
+            background: var(--acc);
+        }
+        .pill.muted {
+            background: transparent;
+            color: var(--dim);
+            border: 1px solid var(--line);
         }
 
+        /* ---------- SIGNATURE CREATORS ---------- */
+        .creators {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 20px;
+        }
+        .creator {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .creator:hover {
+            transform: translateY(-5px);
+            border-color: var(--cc);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+        }
+        .creator .icon-box {
+            font-size: 2.1rem;
+            color: var(--cc);
+            margin-bottom: 14px;
+        }
+        .creator h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.35rem;
+            margin: 0 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .creator p {
+            color: var(--sub);
+            font-size: 0.86rem;
+            line-height: 1.5;
+            margin: 0 0 20px;
+            flex: 1;
+        }
+        .creator .btn {
+            justify-content: center;
+            font-size: 0.78rem;
+            padding: 11px 16px;
+            background: var(--cc);
+            color: var(--cc-fg, #0b0d10);
+        }
+
+        .creator.lspd  { --cc: var(--police); border-top: 3px solid var(--police); }
+        .creator.sams  { --cc: var(--ems);    border-top: 3px solid var(--ems); }
+        .creator.lsc   { --cc: var(--lsc);    border-top: 3px solid var(--lsc); }
+        .creator.weazel{ --cc: var(--weazel); --cc-fg: #0b0d10; border-top: 3px solid var(--weazel); }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            width: 100%;
+            background: var(--bg-soft);
+            margin-top: auto;
+            padding: 40px 0;
+            border-top: 1px solid #22262e;
+            text-align: center;
+        }
+        .footer-content { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
         .footer-links {
             margin-bottom: 20px;
             display: flex;
             justify-content: center;
-            gap: 25px;
+            gap: 26px;
             flex-wrap: wrap;
         }
-
         .footer-links a {
-            color: var(--text-sub);
+            color: var(--sub);
             text-decoration: none;
             font-size: 0.9rem;
             transition: color 0.2s;
         }
+        .footer-links a:hover { color: var(--text); }
+        .footer-links i { margin-right: 8px; }
+        .copyright { color: #555; font-size: 0.75rem; margin-top: 10px; }
 
-        .footer-links a:hover {
-            color: var(--text-main);
-        }
-
-        .footer-links i {
-            margin-right: 8px;
-        }
-
-        .copyright {
-            color: #555;
-            font-size: 0.75rem;
-            margin-top: 10px;
+        @media (max-width: 600px) {
+            .section-head .tag { display: none; }
+            .f-actions { flex-direction: column; align-items: stretch; }
+            .f-actions .btn { justify-content: center; }
         }
     </style>
 </head>
@@ -237,87 +329,112 @@
 
     <header>
         <div class="logo-container">
-            <img src="https://forum.playgta5rp.com/data/assets/logo/ParadiseRoleplay1white.png" alt="Paradise Roleplay Logo">
+            <!-- logo intentionally left blank - generic toolkit, no faction branding -->
         </div>
-        <h1>Asset Creator</h1>
-        <p class="subtitle">Select your faction to access their asset hub.</p>
+        <h1>RP-Toolkit</h1>
+        <p class="subtitle">Signature creators &amp; content tools for your roleplay community.</p>
     </header>
 
-    <div class="container">
-        <div class="card police">
-            <div>
-                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                <h2>LSPD</h2>
-                <p class="desc">Create official LSPD signatures. Customize badge numbers, ranks, and unit callsigns.</p>
-            </div>
-            <a href="LSPD/lspd.html" class="btn">Create Signature</a>
-        </div>
+    <div class="page">
 
-        <div class="card ems">
-            <div>
-                <div class="icon-box"><i class="fas fa-ambulance"></i></div>
-                <h2>SAMS</h2>
-                <p class="desc">Design signatures for SAFD. Includes templates for Paramedics and Firefighters.</p>
+        <!-- ============ SIGNATURE CREATORS ============ -->
+        <section>
+            <div class="section-head">
+                <span class="bar"></span>
+                <h2>Signature Creators</h2>
+                <span class="tag">Faction Hubs</span>
             </div>
-            <a href="SAMS/sams.html" class="btn">Create Signature</a>
-        </div>
 
-        <div class="card bcso">
-            <div>
-                <div class="icon-box"><i class="fas fa-star"></i></div>
-                <h2>BCSO</h2>
-                <p class="desc">Official signatures and identity cards for the Blaine County Sheriff's Office.</p>
-            </div>
-            <a href="404.html" class="btn">Create Signature</a>
-        </div>
+            <div class="creators">
 
-        <div class="card doj">
-            <div>
-                <div class="icon-box"><i class="fas fa-balance-scale"></i></div>
-                <h2>GOV.</h2>
-                <p class="desc">Signatures and official documentation for the Department Of Justice.</p>
-            </div>
-            <a href="404.html" class="btn">Create Signature</a>
-        </div>
+                <div class="creator lspd">
+                    <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+                    <h3>LSPD</h3>
+                    <p>Official LSPD signatures. Customize badge numbers, ranks, and unit callsigns.</p>
+                    <a href="LSPD/lspd.html" class="btn">Create Signature</a>
+                </div>
 
-        <div class="card doc">
-            <div>
-                <div class="icon-box"><i class="fas fa-lock"></i></div>
-                <h2>DOC</h2>
-                <p class="desc">Signatures and official personnel documents for the Department of Corrections.</p>
-            </div>
-            <a href="404.html" class="btn">Create Signature</a>
-        </div>
+                <div class="creator sams">
+                    <div class="icon-box"><i class="fas fa-ambulance"></i></div>
+                    <h3>SAMS</h3>
+                    <p>Signatures for SAFD. Templates for Paramedics and Firefighters.</p>
+                    <a href="SAMS/sams.html" class="btn">Create Signature</a>
+                </div>
 
-        <div class="card lsc">
-            <div>
-                <div class="icon-box"><i class="fas fa-tools"></i></div>
-                <h2>L.S. Customs</h2>
-                <p class="desc">Signatures and service documents for Los Santos Customs employees.</p>
-            </div>
-            <a href="LSC/lsc.html" class="btn">Create Signature</a>
-        </div>
+                <div class="creator lsc">
+                    <div class="icon-box"><i class="fas fa-tools"></i></div>
+                    <h3>L.S. Customs</h3>
+                    <p>Signatures and service documents for Los Santos Customs employees.</p>
+                    <a href="LSC/lsc.html" class="btn">Create Signature</a>
+                </div>
 
-        <div class="card weazel">
-            <div>
-                <div class="icon-box"><i class="fas fa-newspaper"></i></div>
-                <h2>Weazel News</h2>
-                <p class="desc">Signatures and documents for weazel news employees.</p>
+                <div class="creator weazel">
+                    <div class="icon-box"><i class="fas fa-newspaper"></i></div>
+                    <h3>Weazel News</h3>
+                    <p>Signatures and documents for Weazel News employees.</p>
+                    <a href="WeazelNews/weazel.html" class="btn">Create Signature</a>
+                </div>
+
             </div>
-            <a href="WeazelNews/weazel.html" class="btn-black">Create Signature</a>
-        </div>
+        </section>
+
+        <!-- ============ CONTENT TOOLS ============ -->
+        <section>
+            <div class="section-head">
+                <span class="bar"></span>
+                <h2>Content Tools</h2>
+                <span class="tag">Immersive Media</span>
+            </div>
+
+            <div class="featured">
+
+                <!-- MockChat -->
+                <div class="feature mockchat">
+                    <div class="f-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                    <h3>MockChat</h3>
+                    <p class="f-sub">Build immersive media from scratch: fake conversation screenshots, websites and livestreams for your scenes.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Conversation screenshots (WhatsApp and iMessage)</li>
+                        <li><i class="fa-solid fa-check"></i> TikTok clips and LIVE streams with comments</li>
+                        <li><i class="fa-solid fa-check"></i> Export as still image or video</li>
+                    </ul>
+                    <div class="f-actions">
+                        <a class="btn primary" href="https://mockchat.local:8443/" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Launch Studio
+                        </a>
+                    </div>
+                </div>
+
+                <!-- XION-ChaseCam -->
+                <div class="feature chasecam">
+                    <div class="f-icon"><i class="fa-solid fa-video"></i></div>
+                    <h3>XION-ChaseCam</h3>
+                    <p class="f-sub">Drop in a video and get the AXON-style bodycam overlay applied automatically. Tune it, then download.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Upload any video file</li>
+                        <li><i class="fa-solid fa-check"></i> Edit user, role &amp; agency before render</li>
+                        <li><i class="fa-solid fa-check"></i> Download the edited clip, or an OBS-ready overlay script</li>
+                    </ul>
+                    <div class="f-actions">
+                        <span class="pill muted">Coming soon</span>
+                        <span class="btn ghost" aria-disabled="true">
+                            <i class="fa-solid fa-hourglass-half"></i> In Development
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
     </div>
 
     <footer>
         <div class="footer-content">
             <div class="footer-links">
-                <a href="https://discord.gg/gtavrp"><i class="fab fa-discord"></i> Discord</a>
-                <a href="https://forum.playgta5rp.com/index.php"><i class="fas fa-comments"></i> Community Forums</a>
                 <a href="https://wagonwheel.space"><i class="fas fa-life-ring"></i> Portfolio</a>
             </div>
             <div class="copyright">
-                &copy; 2026 Developed by WagonWheel / WagonWheelz. Licensed under GPL v2.<br>
-                For the ParadiseRP community.
+                &copy; 2026 Developed by WagonWheel / WagonWheelz. Licensed under GPL v2.
             </div>
         </div>
     </footer>
