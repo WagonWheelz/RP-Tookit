@@ -1,0 +1,126 @@
+/* ===========================================================================
+   iMessage skin
+   =========================================================================== */
+.phone[data-platform="imessage"] {
+  --radius: 18px;
+  --tick-read: #8e8e93;
+  --quote-bg: rgba(120,120,128,.16);
+  --attach-bg: rgba(120,120,128,.14);
+  --pill-bg: transparent;
+  --reaction-bg: #e9e9eb;
+  --reaction-border: #fff;
+  --wave-off: rgba(255,255,255,.45);
+  --wave-on: #fff;
+  --wave-knob: #fff;
+  --voice-icon: #fff;
+}
+.phone[data-platform="imessage"][data-theme="dark"] {
+  --quote-bg: rgba(120,120,128,.32);
+  --attach-bg: rgba(120,120,128,.28);
+  --reaction-bg: #26252a;
+  --reaction-border: #000;
+}
+.phone[data-platform="imessage"] .side-in .voice { --wave-off: rgba(0,0,0,.25); --wave-on: #4a4a4e; --wave-knob: #4a4a4e; --voice-icon: #4a4a4e; }
+.phone[data-platform="imessage"][data-theme="dark"] .side-in .voice { --wave-off: rgba(255,255,255,.3); --wave-on: #d8d8dc; --wave-knob: #d8d8dc; --voice-icon: #d8d8dc; }
+
+.phone[data-platform="imessage"] .chat-scroll { padding: 8px 12px 10px; gap: 2px; }
+.phone[data-platform="imessage"] .msg.grp-start { margin-top: 9px; }
+.phone[data-platform="imessage"] .bubble {
+  padding: 7px 13px 8px;
+  box-shadow: none;
+  border-radius: var(--radius);
+}
+.phone[data-platform="imessage"] .bubble .btext { font-size: calc(16.5px * var(--fs,1)); line-height: 1.3; }
+.phone[data-platform="imessage"] .msg .stack { max-width: 74%; }
+
+/* bottom tails */
+.phone[data-platform="imessage"] .msg.tail .bubble::before,
+.phone[data-platform="imessage"] .msg.tail .bubble::after { content: ''; position: absolute; bottom: 0; }
+.phone[data-platform="imessage"] .msg.side-in.tail .bubble::before {
+  left: -7px; width: 20px; height: 20px;
+  background: var(--bubble-in);
+  border-bottom-right-radius: 16px 14px;
+}
+.phone[data-platform="imessage"] .msg.side-in.tail .bubble::after {
+  left: -11px; width: 11px; height: 20px;
+  background: var(--bg);
+  border-bottom-right-radius: 10px;
+}
+.phone[data-platform="imessage"] .msg.side-out.tail .bubble::before {
+  right: -7px; width: 20px; height: 20px;
+  background: var(--bubble-out);
+  border-bottom-left-radius: 16px 14px;
+}
+.phone[data-platform="imessage"] .msg.side-out.tail .bubble::after {
+  right: -11px; width: 11px; height: 20px;
+  background: var(--bg);
+  border-bottom-left-radius: 10px;
+}
+.phone[data-platform="imessage"] .msg.type-sticker.tail .bubble::before,
+.phone[data-platform="imessage"] .msg.type-sticker.tail .bubble::after { display: none; }
+
+/* delivery status under the last outgoing message */
+.phone[data-platform="imessage"] .status-line {
+  align-self: flex-end;
+  font-size: calc(11px * var(--fs,1));
+  color: var(--meta);
+  margin: 2px 3px 2px 0;
+  font-weight: 500;
+}
+.phone[data-platform="imessage"] .status-line b { font-weight: 600; }
+/* every sent message has one; only the newest on screen shows it */
+.phone[data-platform="imessage"] .msg:not(.is-last-out) .status-line { display: none; }
+
+/* time separators are centred, no pill */
+.phone[data-platform="imessage"] .divider {
+  background: none; box-shadow: none; color: var(--meta);
+  font-size: calc(11.5px * var(--fs,1)); font-weight: 500; margin: 12px auto 6px;
+}
+.phone[data-platform="imessage"] .divider b { font-weight: 700; }
+.phone[data-platform="imessage"] .system-note { background: none; box-shadow: none; }
+
+/* header is centred, avatar above the name */
+.phone[data-platform="imessage"] .chat-header {
+  align-items: center; padding: 4px 10px 8px; gap: 6px;
+  border-bottom: .5px solid rgba(128,128,128,.3);
+}
+.phone[data-platform="imessage"] .chat-header .hdr-center {
+  flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0;
+}
+.phone[data-platform="imessage"] .chat-header .hdr-avatar { width: 44px; height: 44px; }
+.phone[data-platform="imessage"] .chat-header .hdr-name {
+  font-size: calc(12px * var(--fs,1)); font-weight: 500; text-align: center;
+  display: flex; align-items: center; gap: 3px;
+}
+.phone[data-platform="imessage"] .chat-header .hdr-back { color: var(--accent); }
+
+/* input bar with the little arrow send button */
+.phone[data-platform="imessage"] .input-bar { padding: 7px 10px 8px; gap: 8px; border-top: .5px solid rgba(128,128,128,.25); }
+.phone[data-platform="imessage"] .input-bar .field {
+  border: 1px solid rgba(128,128,128,.4); background: transparent; border-radius: 19px; padding: 7px 12px;
+}
+.phone[data-platform="imessage"] .input-bar .round { width: 30px; height: 30px; }
+
+/* iMessage tapbacks sit half over the bubble corner */
+.phone[data-platform="imessage"] .reactions {
+  margin-top: -14px; padding: 2px 6px; border-width: 2px;
+}
+.phone[data-platform="imessage"] .msg.side-in .reactions  { align-self: flex-end; }
+.phone[data-platform="imessage"] .msg.side-out .reactions { align-self: flex-start; }
+
+/* iMessage has no per-bubble timestamps — only dividers and the Read line */
+.phone[data-platform="imessage"] .bubble > .meta-row,
+.phone[data-platform="imessage"] .media-wrap .float-meta { display: none; }
+
+/* quotes stay legible on the blue outgoing bubble */
+.phone[data-platform="imessage"] .side-out .reply-quote {
+  background: rgba(255,255,255,.18); border-left-color: rgba(255,255,255,.85);
+}
+.phone[data-platform="imessage"] .side-out .reply-quote .q-name { color: #fff; }
+.phone[data-platform="imessage"] .side-out .reply-quote .q-text { color: rgba(255,255,255,.82); }
+.phone[data-platform="imessage"] .side-out .doc,
+.phone[data-platform="imessage"] .side-out .linkprev { background: rgba(255,255,255,.18); }
+.phone[data-platform="imessage"] .side-out .doc .doc-sub,
+.phone[data-platform="imessage"] .side-out .c-sub,
+.phone[data-platform="imessage"] .side-out .fwd { color: rgba(255,255,255,.8); }
+.phone[data-platform="imessage"] .side-out .call-row .c-ic { background: rgba(255,255,255,.2); color: #fff; }

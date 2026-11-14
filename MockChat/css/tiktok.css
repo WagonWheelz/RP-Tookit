@@ -1,0 +1,464 @@
+/* ===========================================================================
+   TikTok — the live stream and the regular feed
+   =========================================================================== */
+.phone[data-platform="tiktok"],
+.phone[data-platform="tiktoklive"] {
+  --tt-red: #fe2c55;
+  --tt-cyan: #20d5ec;
+  --radius: 8px;
+  background: #000;
+  color: #fff;
+}
+
+/* the status bar and home indicator float over the video */
+.tt-status {
+  position: absolute; left: 0; right: 0; top: 0;
+  background: transparent !important;
+  color: #fff !important;
+  z-index: 30;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+.home-indicator.tt-home {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: transparent; color: #fff; z-index: 30;
+}
+.home-indicator.tt-home i { opacity: .9; }
+
+.phone > .tt {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  font-family: var(--font);
+  color: #fff;
+}
+
+/* --- the video area ------------------------------------------------------ */
+.tt-stage { position: absolute; inset: 0; background: #0b0b0d; }
+.tt-cells { position: absolute; inset: 0; display: grid; gap: 2px; background: #000; }
+.tt-cells[data-layout="single"]  { grid-template: 1fr / 1fr; gap: 0; }
+.tt-cells[data-layout="group4"]  { grid-template: 1fr 1fr / 1fr 1fr; }
+.tt-cells[data-layout="gameplay"]{ grid-template: var(--camratio, 38%) 1fr / 1fr; }
+.tt-cells[data-layout="duet"]    { grid-template: 1fr / 1fr 1fr; }
+
+.tt-cell { position: relative; overflow: hidden; background: #14151a; }
+/* A cell placed straight into the stage rather than into the .tt-cells grid has
+   nothing in normal flow to give it height, so it would collapse to nothing and
+   take the clip inside it with it. Belt and braces for the wrapper above. */
+.tt-stage > .tt-cell { position: absolute; inset: 0; }
+.tt-cell > .fitimg, .tt-cell > video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: var(--of, cover);   /* the Adjust… dialog sets this per clip */
+}
+.tt-cell-empty {
+  position: absolute; inset: 0;
+  display: grid; place-items: center; text-align: center; padding: 12px;
+  background: linear-gradient(150deg, #2a2d3a, #14151a 60%, #1e2029);
+  color: rgba(255,255,255,.35); font-size: 11px; letter-spacing: .3px;
+}
+.tt-cell-chip {
+  position: absolute; left: 6px; bottom: 6px; z-index: 2;
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+  border-radius: 20px; padding: 3px 8px;
+  font-size: calc(11px * var(--fs,1)); font-weight: 500;
+  max-width: 90%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.tt-cells[data-layout="group4"] .tt-cell:nth-child(3) .tt-cell-chip,
+.tt-cells[data-layout="group4"] .tt-cell:nth-child(4) .tt-cell-chip { top: 6px; bottom: auto; }
+.tt-cells[data-layout="duet"] .tt-cell-chip { top: 118px; bottom: auto; }
+.tt-livedot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--tt-red);
+  display: block; flex: 0 0 auto; animation: ttPulse 1.6s ease-in-out infinite;
+}
+@keyframes ttPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* darkening so white overlay text stays readable on any footage */
+.tt-scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.5) 0, rgba(0,0,0,0) 18%),
+    linear-gradient(to top, rgba(0,0,0,.55) 0, rgba(0,0,0,0) 38%);
+}
+.tt-scrim.feed {
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.42) 0, rgba(0,0,0,0) 16%),
+    linear-gradient(to top, rgba(0,0,0,.62) 0, rgba(0,0,0,0) 42%);
+}
+
+/* --- overlay column ------------------------------------------------------ */
+.tt-ui {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: 46px 0 0;
+  z-index: 10;
+}
+.tt-spacer { flex: 1 1 auto; min-height: 0; }
+
+/* --- live: top bar ------------------------------------------------------- */
+.tt-top { display: flex; align-items: flex-start; gap: 6px; padding: 4px 8px 0; }
+.tt-host {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,.34); border-radius: 22px; padding: 3px 3px 3px 3px;
+  max-width: 62%;
+}
+.tt-host-av {
+  width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+  background: #4b4f5c; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+}
+.tt-host-meta { min-width: 0; }
+.tt-host-name {
+  font-size: calc(12.5px * var(--fs,1)); font-weight: 600; line-height: 1.15;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;
+}
+.tt-host-sub { font-size: calc(10.5px * var(--fs,1)); color: rgba(255,255,255,.72); line-height: 1.2; }
+.tt-follow {
+  background: var(--tt-red); color: #fff; font-size: calc(11.5px * var(--fs,1)); font-weight: 700;
+  border-radius: 20px; padding: 5px 11px; flex: 0 0 auto;
+}
+.tt-follow.following { background: rgba(255,255,255,.2); }
+
+.tt-top-right { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+.tt-rank, .tt-viewers {
+  display: flex; align-items: center; gap: 3px;
+  background: rgba(0,0,0,.34); border-radius: 20px; padding: 4px 8px;
+  font-size: calc(11px * var(--fs,1)); font-weight: 600; white-space: nowrap;
+}
+.tt-rank { color: #ffd66b; }
+.tt-x { display: grid; place-items: center; width: 26px; height: 26px; opacity: .9; }
+
+/* --- live: duet battle bar ----------------------------------------------- */
+.tt-duetbar { padding: 6px 10px 0; }
+.tt-duet-timer {
+  text-align: center; font-size: calc(11px * var(--fs,1)); font-weight: 700;
+  background: rgba(0,0,0,.4); border-radius: 20px; padding: 2px 0; width: 62px; margin: 0 auto 4px;
+}
+.tt-duet-track {
+  position: relative; height: 12px; border-radius: 8px; overflow: visible;
+  display: flex; background: rgba(0,0,0,.4);
+}
+.tt-duet-fill { height: 100%; }
+.tt-duet-fill.left  { background: linear-gradient(90deg, #4dc3ff, #1f7bff); border-radius: 8px 0 0 8px; }
+.tt-duet-fill.right { background: linear-gradient(90deg, #ff4d94, #ff2d55); border-radius: 0 8px 8px 0; }
+.tt-duet-vs {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  background: #fff; color: #111; font-size: 9px; font-weight: 900;
+  border-radius: 20px; padding: 2px 6px; box-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.tt-duet-scores {
+  display: flex; justify-content: space-between;
+  font-size: calc(11px * var(--fs,1)); font-weight: 700; margin-top: 3px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
+}
+
+/* --- live: gift banners --------------------------------------------------- */
+.tt-gifts { padding: 0 8px; display: flex; flex-direction: column; gap: 5px; flex: 0 0 auto; }
+.tt-gift {
+  display: flex; align-items: center; gap: 7px;
+  background: linear-gradient(90deg, rgba(255,45,85,.92), rgba(255,45,85,.35) 78%, rgba(255,45,85,0));
+  border-radius: 24px 8px 8px 24px;
+  padding: 4px 10px 4px 4px;
+  max-width: 84%; align-self: flex-start;
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+.tt-gift.hidden { display: none; }
+.tt-gift-av {
+  width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+  background: #5a4a6a; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+}
+.tt-gift-body { min-width: 0; flex: 1 1 auto; }
+.tt-gift-line { font-size: calc(11.5px * var(--fs,1)); line-height: 1.25; }
+.tt-gift-line .u { font-weight: 700; }
+.tt-gift-line .g { font-weight: 700; color: #ffe27a; }
+.tt-gift-coins { display: flex; align-items: center; gap: 3px; font-size: calc(10px * var(--fs,1)); opacity: .9; }
+.tt-gift-icon { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; }
+.tt-gift-emoji { font-size: calc(28px * var(--fs,1)); line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+.tt-gift-img { width: 34px; height: 34px; object-fit: contain !important; }
+.tt-gift-x {
+  flex: 0 0 auto; font-size: calc(19px * var(--fs,1)); font-weight: 900; font-style: italic;
+  color: #ffe27a; text-shadow: 0 2px 4px rgba(0,0,0,.5);
+}
+
+/* --- live: comment column ------------------------------------------------- */
+.tt-chat {
+  flex: 0 0 auto;
+  max-height: calc(var(--lines, 6) * 30px * var(--fs, 1));
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  gap: 4px; padding: 6px 8px 4px;
+  width: 76%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+}
+.tt-c {
+  display: flex; align-items: flex-start; gap: 6px;
+  align-self: flex-start; max-width: 100%;
+}
+.tt-c.hidden, .tt-sys.hidden, .tt-fc.hidden { display: none; }
+.tt-c-av {
+  width: 24px; height: 24px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+  background: #4b4f5c; display: grid; place-items: center; font-size: 10px; font-weight: 700;
+}
+.tt-c-body {
+  background: rgba(0,0,0,.3); border-radius: 14px; padding: 4px 9px;
+  font-size: calc(12.5px * var(--fs,1)); line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.tt-c-user { color: rgba(255,255,255,.68); font-weight: 500; }
+.tt-c-text { color: #fff; }
+.tt-badge {
+  display: inline-block; vertical-align: 1px;
+  background: #8a5cff; color: #fff; border-radius: 4px;
+  font-size: calc(9px * var(--fs,1)); font-weight: 800; letter-spacing: .3px;
+  padding: 1px 4px; margin-right: 4px;
+}
+.tt-badge.sub { background: linear-gradient(90deg, #ffb020, #ff6a00); }
+
+.tt-sys { align-self: flex-start; max-width: 100%; }
+.tt-sys-pill {
+  display: inline-block;
+  background: rgba(0,0,0,.3); border-radius: 14px; padding: 4px 9px;
+  font-size: calc(12px * var(--fs,1)); color: rgba(255,255,255,.85);
+}
+.tt-sys-pill b { color: #ffe27a; font-weight: 600; }
+.tt-sys.tt-ev-follow .tt-sys-pill b { color: #7fe0ff; }
+.tt-sys.tt-ev-join .tt-sys-pill { color: rgba(255,255,255,.7); }
+.tt-sys.tt-ev-share .tt-sys-pill b { color: #a8ff9e; }
+
+/* --- live: bottom bar ----------------------------------------------------- */
+.tt-bottom {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px 12px;
+}
+.tt-say {
+  flex: 1 1 auto; background: rgba(255,255,255,.16); border-radius: 22px;
+  padding: 8px 14px; font-size: calc(12.5px * var(--fs,1)); color: rgba(255,255,255,.8);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tt-bicon {
+  width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto;
+  background: rgba(255,255,255,.16); display: grid; place-items: center;
+}
+.tt-bicon.gift { background: linear-gradient(140deg, #ff6a9a, #fe2c55); }
+
+/* --- floating reactions ---------------------------------------------------- */
+.tt-floaters {
+  position: absolute; right: 6px; bottom: 56px;
+  width: 96px; height: 58%;
+  pointer-events: none; overflow: visible; z-index: 12;
+}
+.tt-floaters[data-side="left"]  { right: auto; left: 8px; }
+.tt-floaters[data-side="both"]  { right: 8px; left: 8px; width: auto; }
+.tt-f {
+  position: absolute; bottom: 0; left: 8px;
+  line-height: 1;
+  animation: ttFloat var(--dur, 4.4s) linear infinite;
+  will-change: bottom, transform, opacity;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+}
+.tt-floaters[data-side="both"] .tt-f:nth-child(even) { left: auto; right: 8px; }
+/* `bottom` is a percentage of the container, which is what we actually want —
+   a percentage inside translateY would resolve against the emoji itself. */
+@keyframes ttFloat {
+  0%   { bottom: -6%;  opacity: 0; transform: translateX(var(--x,0)) scale(calc(var(--s,1) * .45)); }
+  10%  { bottom: 6%;   opacity: 1; transform: translateX(var(--x,0)) scale(var(--s,1)); }
+  55%  { bottom: 56%;  opacity: .95; transform: translateX(calc(var(--x,0) + var(--w,0))) scale(var(--s,1)); }
+  85%  { opacity: .55; }
+  100% { bottom: 104%; opacity: 0; transform: translateX(var(--x,0)) scale(calc(var(--s,1) * .8)); }
+}
+/* one-shot burst fired by a "reactions" event */
+.tt-f.burst { animation: ttFloat var(--dur, 4.4s) linear 1 forwards; }
+
+/* ===========================================================================
+   Regular feed
+   =========================================================================== */
+.tt-feed .tt-ui { padding-top: 44px; }
+.tt-feed[data-nav="1"] .tt-ui { padding-bottom: 62px; }
+.tt-feed[data-nav="1"] .tt-rail { bottom: 118px; }
+.tt-feed[data-nav="0"] .tt-rail { bottom: 92px; }
+.tt-feed-top {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 4px 0 2px; position: relative;
+  font-size: calc(15px * var(--fs,1)); font-weight: 600;
+}
+.tt-feed-top span { color: rgba(255,255,255,.6); }
+.tt-feed-top span.on { color: #fff; position: relative; }
+.tt-feed-top span.on::after {
+  content: ''; position: absolute; left: 20%; right: 20%; bottom: -5px;
+  height: 2.5px; border-radius: 2px; background: #fff;
+}
+.tt-feed-top i { width: 1px; height: 12px; background: rgba(255,255,255,.4); display: block; }
+.tt-feed-search { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+
+.tt-searchbar {
+  margin: 12px 12px 0;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.16); border-radius: 8px; padding: 7px 10px;
+  font-size: calc(12.5px * var(--fs,1));
+}
+.tt-searchbar span { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-searchbar b { font-weight: 600; color: rgba(255,255,255,.85); font-size: calc(11.5px * var(--fs,1)); }
+
+/* right-hand rail */
+.tt-rail {
+  position: absolute; right: 6px; bottom: 96px;
+  display: flex; flex-direction: column; align-items: center; gap: 15px;
+  z-index: 14;
+}
+.tt-rail-av { position: relative; margin-bottom: 4px; }
+.tt-rail-avimg {
+  width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+  border: 1.5px solid #fff; background: #4b4f5c;
+  display: grid; place-items: center; font-size: 16px; font-weight: 700;
+}
+.tt-rail-plus {
+  position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%);
+  width: 19px; height: 19px; border-radius: 50%; background: var(--tt-red);
+  color: #fff; font-size: 13px; font-weight: 700; font-style: normal;
+  display: grid; place-items: center; line-height: 1;
+}
+.tt-rail-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.tt-rail-item .ic { filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); display: block; }
+.tt-rail-item .ic.heart { color: #fff; }
+.tt-rail-item .ic.fav { color: #fff; }
+.tt-rail-item b {
+  font-size: calc(11.5px * var(--fs,1)); font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+.tt-disc {
+  width: 42px; height: 42px; border-radius: 50%; margin-top: 4px;
+  background: radial-gradient(circle at 50% 50%, #3a3a3a 0 26%, #111 27% 100%);
+  border: 5px solid #1a1a1a;
+  display: grid; place-items: center; overflow: hidden;
+  animation: ttSpin 4s linear infinite;
+}
+.tt-disc .fitimg { border-radius: 50%; }
+.tt-disc-note { font-size: 17px; line-height: 1; color: #fff; opacity: .9; }
+@keyframes ttSpin { to { transform: rotate(360deg); } }
+
+/* caption block */
+.tt-caption { padding: 0 84px 8px 12px; }
+.tt-cap-user {
+  display: flex; align-items: center; gap: 4px;
+  font-size: calc(15px * var(--fs,1)); font-weight: 700; margin-bottom: 4px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.tt-cap-text {
+  font-size: calc(13.5px * var(--fs,1)); line-height: 1.35; margin-bottom: 7px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tt-tags { font-weight: 600; }
+.tt-music { display: flex; align-items: center; gap: 6px; overflow: hidden; }
+.tt-music .ic { flex: 0 0 auto; }
+.tt-music-track {
+  display: flex; gap: 300px; white-space: nowrap;
+  font-size: calc(12.5px * var(--fs,1));
+  animation: ttMarquee 13s linear infinite;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+/* one copy plus the gap = (total + gap) / 2, so the loop is seamless */
+@keyframes ttMarquee { to { transform: translateX(calc(-50% - 150px)); } }
+
+.tt-progress {
+  height: 2px; background: rgba(255,255,255,.28); margin: 0 0 6px;
+}
+.tt-progress i { display: block; height: 100%; background: #fff; }
+
+/* comment sheet */
+.tt-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  background: #1c1c1e; border-radius: 14px 14px 0 0; z-index: 20;
+  display: flex; flex-direction: column;
+  box-shadow: 0 -8px 30px rgba(0,0,0,.5);
+}
+.tt-sheet-head {
+  position: relative; flex: 0 0 auto; padding: 12px 12px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.tt-sheet-head .grab {
+  position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+  width: 34px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.24);
+}
+.tt-sheet-title { text-align: center; font-size: calc(13px * var(--fs,1)); font-weight: 600; }
+.tt-sheet-x { position: absolute; right: 12px; top: 12px; opacity: .8; }
+.tt-sheet-list {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 8px 12px; display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: none;
+}
+.tt-sheet-list::-webkit-scrollbar { width: 0; }
+.tt-sheet-input {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px 14px; border-top: 1px solid rgba(255,255,255,.08);
+}
+.tt-sheet-input > span {
+  flex: 1 1 auto; background: rgba(255,255,255,.1); border-radius: 18px;
+  padding: 8px 12px; font-size: calc(12.5px * var(--fs,1)); color: rgba(255,255,255,.5);
+}
+.tt-sheet-icons { display: flex; gap: 10px; opacity: .8; flex: 0 0 auto; }
+
+.tt-fc { display: flex; align-items: flex-start; gap: 9px; }
+.tt-fc-av {
+  width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+  background: #4b4f5c; display: grid; place-items: center; font-size: 13px; font-weight: 700;
+}
+.tt-fc-body { flex: 1 1 auto; min-width: 0; }
+.tt-fc-user {
+  font-size: calc(12px * var(--fs,1)); color: rgba(255,255,255,.55); margin-bottom: 2px;
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+}
+.tt-fc-text { font-size: calc(13.5px * var(--fs,1)); line-height: 1.35; overflow-wrap: anywhere; }
+.tt-fc-meta {
+  display: flex; gap: 14px; margin-top: 4px;
+  font-size: calc(11.5px * var(--fs,1)); color: rgba(255,255,255,.45);
+}
+.tt-fc-like {
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: rgba(255,255,255,.45); padding-top: 2px;
+}
+.tt-fc-like b { font-size: calc(10.5px * var(--fs,1)); font-weight: 500; }
+
+/* bottom nav */
+.tt-nav {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 22;
+  display: flex; align-items: center; justify-content: space-around;
+  background: #000; padding: 7px 4px 18px;
+}
+.tt-nav > div {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: rgba(255,255,255,.55); font-size: calc(10px * var(--fs,1));
+}
+.tt-nav > div.on { color: #fff; }
+.tt-nav-plus { position: relative; width: 44px; height: 29px; }
+.tt-nav-plus i {
+  position: absolute; inset: 0; border-radius: 8px;
+  background: linear-gradient(90deg, #20d5ec 0 22%, #fff 22% 78%, #fe2c55 78% 100%);
+}
+.tt-nav-plus b {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: #111; font-size: 19px; font-weight: 700; line-height: 1;
+}
+
+/* --- parody watermark ------------------------------------------------------ */
+.tt-watermark {
+  position: absolute; z-index: 40; pointer-events: none;
+  transform-origin: 50% 50%;
+  display: flex; align-items: center; gap: 5px;
+  font-weight: 800; letter-spacing: -.4px; color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+/* free placement — dragged anywhere on the screen, anchored at its centre */
+.tt-watermark { white-space: nowrap; }
+.tt-watermark .wm-logo {
+  width: 1.35em; height: 1.35em; display: block; overflow: hidden; border-radius: 4px;
+}
+.tt-watermark .wm-logo .fitimg { width: 100%; height: 100%; }
+
+/* the chat platforms can carry a watermark too */
+.phone[data-platform="whatsapp"] .tt-watermark,
+.phone[data-platform="imessage"] .tt-watermark { color: var(--text-in); text-shadow: none; }
+
+/* draggable only inside the editor's preview — never in an export */
+#preview .tt-watermark { pointer-events: auto; cursor: grab; }
+#preview .tt-watermark:hover { outline: 1px dashed rgba(255,255,255,.55); outline-offset: 5px; }
+#preview .tt-watermark.dragging { cursor: grabbing; outline: 1px solid var(--tt-red, #fe2c55); outline-offset: 5px; }

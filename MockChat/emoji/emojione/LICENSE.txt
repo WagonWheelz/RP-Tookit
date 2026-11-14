@@ -1,0 +1,4 @@
+EmojiOne 2.2.7 artwork — https://www.emojione.com
+Emoji art supplied by EmojiOne, licensed under Creative Commons Attribution 4.0
+International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+Files copied unchanged from the emojione@2.2.7 npm package (assets/svg).

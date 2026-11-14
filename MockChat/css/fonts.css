@@ -1,0 +1,12 @@
+/* Bundled web fonts (SIL Open Font License — see fonts/LICENSE-*.txt).
+
+   Shipped with the app rather than taken from the viewer's system, so a phone
+   set in Inter or Roboto exports the same on every machine. Latin subset only;
+   anything outside it (and every emoji) falls back to the system. */
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: block; src: url("../fonts/inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: block; src: url("../fonts/inter-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: block; src: url("../fonts/inter-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: block; src: url("../fonts/inter-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 400; font-display: block; src: url("../fonts/roboto-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 500; font-display: block; src: url("../fonts/roboto-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 700; font-display: block; src: url("../fonts/roboto-latin-700-normal.woff2") format("woff2"); }

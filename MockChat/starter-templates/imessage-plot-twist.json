@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "iMessage — plot twist"
+  },
+  "platform": "imessage",
+  "theme": "dark",
+  "chat": {
+    "contactName": "Mum",
+    "statusBar": {
+      "time": "9:41",
+      "battery": 68,
+      "charging": false,
+      "signal": 4,
+      "wifi": true,
+      "carrier": ""
+    },
+    "device": "iphone15",
+    "width": 393,
+    "height": 852,
+    "inputPlaceholder": "iMessage"
+  },
+  "timeline": {
+    "startDelay": 700,
+    "endHold": 2200,
+    "defaultDelay": 900,
+    "defaultTyping": 1200,
+    "autoScroll": true,
+    "autoTiming": true,
+    "pace": 1
+  },
+  "exportOpts": {
+    "name": "plot-twist",
+    "imgRes": "3x",
+    "vidRes": "2x",
+    "fps": 30,
+    "bitrate": 12,
+    "crop": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "messages": [
+    {
+      "type": "divider",
+      "text": "Today",
+      "time": "9:38",
+      "anim": {
+        "delay": 500,
+        "typing": 0,
+        "effect": "fade",
+        "manual": true
+      }
+    },
+    {
+      "side": "in",
+      "type": "text",
+      "text": "Did you get the parcel?",
+      "anim": {
+        "delay": 700,
+        "typing": 1000,
+        "effect": "pop",
+        "manual": true
+      }
+    },
+    {
+      "side": "out",
+      "type": "text",
+      "text": "what parcel",
+      "status": "read",
+      "time": "9:40",
+      "anim": {
+        "delay": 800,
+        "typing": 0,
+        "effect": "pop",
+        "manual": true
+      }
+    },
+    {
+      "side": "in",
+      "type": "text",
+      "text": "The one I sent on Tuesday",
+      "anim": {
+        "delay": 700,
+        "typing": 1500,
+        "effect": "pop",
+        "manual": true
+      }
+    },
+    {
+      "side": "in",
+      "type": "image",
+      "caption": "this one",
+      "anim": {
+        "delay": 1400,
+        "typing": 900,
+        "effect": "pop",
+        "manual": true
+      }
+    },
+    {
+      "side": "out",
+      "type": "text",
+      "text": "mum that's my flat",
+      "status": "read",
+      "time": "9:41",
+      "anim": {
+        "delay": 900,
+        "typing": 0,
+        "effect": "slam",
+        "manual": true
+      }
+    },
+    {
+      "side": "in",
+      "type": "text",
+      "text": "I know 🙂",
+      "reactions": [
+        "😂"
+      ],
+      "anim": {
+        "delay": 1600,
+        "typing": 2600,
+        "effect": "pop",
+        "manual": true
+      }
+    }
+  ]
+}

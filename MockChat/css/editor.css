@@ -1,0 +1,712 @@
+/* ===========================================================================
+   MockChat Studio — editor chrome
+
+   The controls (buttons, fields, toggles, tabs, fieldsets, lists, the dock,
+   dialogs) are daisyUI, loaded from vendor/daisyui/daisyui.css with a d- prefix
+   (d-btn, d-input…) and our own light pastel "mockchat" theme — see
+   scripts/ui-css/daisyui.src.css. This file lays the editor out and styles the
+   few pieces daisyUI has no component for.
+
+   daisyUI sits in a CSS layer, so a rule here always wins over it. The phone
+   (phone.css and friends) never uses daisyUI classes or colours.
+   =========================================================================== */
+:root {
+  /* every editor colour comes from the daisyUI theme */
+  --ui-bg:      var(--color-base-200);          /* the page, around the panels */
+  --ui-panel:   var(--color-base-100);          /* the panels themselves */
+  --ui-panel-2: var(--color-base-200);          /* rows and cards inside them */
+  --ui-text:    var(--color-base-content);
+  --ui-dim:     color-mix(in oklch, var(--color-base-content) 66%, transparent);
+  --ui-faint:   color-mix(in oklch, var(--color-base-content) 45%, transparent);
+  --ui-line:    color-mix(in oklch, var(--color-base-content) 8%, transparent);
+  --ui-line-2:  color-mix(in oklch, var(--color-base-content) 15%, transparent);
+  --ui-hover:   color-mix(in oklch, var(--color-primary) 9%, var(--color-base-100));
+  --ui-field:   var(--color-base-200);
+  --ui-accent:  var(--color-primary);
+  --ui-sel:     color-mix(in oklch, var(--color-primary) 20%, var(--color-base-100));
+  --ui-sel-line: color-mix(in oklch, var(--color-primary) 80%, transparent);
+  --ui-green:   var(--color-success);
+  --ui-warn:    var(--color-warning);
+  --ui-danger:  var(--color-error);
+  /* Pastels are fills. Where a colour is TEXT it needs a lightness that reads
+     on the panels — darker by day, lighter at night — so each has an "ink":
+     the same hue at the theme's --ui-ink-l (set in each daisyUI theme). */
+  --ui-ink:        oklch(from var(--color-primary) var(--ui-ink-l, .5) calc(c * 1.25) h);
+  --ui-ok-ink:     oklch(from var(--color-success) var(--ui-ink-l, .5) calc(c * 1.2) h);
+  --ui-warn-ink:   oklch(from var(--color-warning) calc(var(--ui-ink-l, .5) + .02) calc(c * 1.2) h);
+  --ui-danger-ink: oklch(from var(--color-error) var(--ui-ink-l, .5) calc(c * 1.25) h);
+  --ui-info-ink:   oklch(from var(--color-info) var(--ui-ink-l, .5) calc(c * 1.25) h);
+  --ui-radius:  var(--radius-field);
+  /* soft lavender-tinted shadows instead of black ones */
+  --ui-shade:     oklch(38% 0.06 292);
+  --ui-shadow-sm: 0 1px 2px color-mix(in oklch, var(--ui-shade) 7%, transparent),
+                  0 3px 10px color-mix(in oklch, var(--ui-shade) 6%, transparent);
+  --ui-shadow-lg: 0 4px 14px color-mix(in oklch, var(--ui-shade) 8%, transparent),
+                  0 22px 60px color-mix(in oklch, var(--ui-shade) 18%, transparent);
+  --ui-scroll:  color-mix(in oklch, var(--color-base-content) 16%, transparent);
+  --ui-scroll-hover: color-mix(in oklch, var(--color-base-content) 26%, transparent);
+}
+
+/* ------------------------------------------------------------ scrollbars
+   One look for every scrollbar in the editor, current and future. The phone
+   hides its own (phone.css), and those more specific rules win there. */
+* { scrollbar-width: thin; scrollbar-color: var(--ui-scroll) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--ui-scroll); border-radius: 10px;
+  border: 3px solid transparent; background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--ui-scroll-hover); }
+::-webkit-scrollbar-corner { background: transparent; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font: 13px/1.45 "Segoe UI", -apple-system, Roboto, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+/* The editor's own font. Not on body: the TikTok screens inherit the page
+   font, so the phone area (and the off-screen export host) keep body's. */
+#app, #modalHost, #toast, .tooltip, .stage-toolbar { font-family: Inter, "Segoe UI", -apple-system, Roboto, sans-serif; }
+#app, #modalHost, #toast, .tooltip { -webkit-font-smoothing: antialiased; }
+#previewBox { font-family: "Segoe UI", -apple-system, Roboto, sans-serif; -webkit-font-smoothing: auto; }
+
+/* ---------------------------------------------------------------- layout
+   The three columns are rounded cards floating on the tinted page. */
+#app { display: grid; grid-template-rows: 54px 1fr 28px; height: 100vh; }
+.topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; background: var(--ui-bg);
+}
+.topbar .brand { font-weight: 700; letter-spacing: .2px; margin-right: 8px; display: flex; align-items: center; gap: 9px; }
+/* the logo: two overlapping chat bubbles, lavender and blush */
+.topbar .brand .logo { position: relative; width: 22px; height: 18px; flex: 0 0 auto; }
+.topbar .brand .logo i {
+  position: absolute; width: 15px; height: 12px; border-radius: 6px;
+  border: 1.5px solid color-mix(in oklch, var(--ui-shade) 25%, transparent);
+}
+.topbar .brand .logo i:first-child { left: 0; top: 0; background: var(--color-primary); border-bottom-left-radius: 2px; }
+.topbar .brand .logo i:last-child { right: 0; bottom: 0; background: var(--color-accent); border-bottom-right-radius: 2px; }
+.topbar .d-tabs { flex: 0 0 auto; }
+.topbar .spacer { flex: 1 1 auto; }
+/* the editor's light/dark: daisyUI's theme controller, a toggle between a sun and a moon */
+.app-theme {
+  display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 0 0 auto;
+  margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--ui-line-2); color: var(--ui-dim);
+}
+.app-theme svg { display: block; }
+.app-theme .d-toggle:checked { color: var(--color-primary); }
+
+.main {
+  display: grid; grid-template-columns: 290px 1fr 340px; gap: 10px;
+  min-height: 0; padding: 0 10px;
+}
+.col {
+  min-height: 0; display: flex; flex-direction: column; background: var(--ui-panel);
+  border: 1px solid var(--ui-line); border-radius: var(--radius-box);
+  box-shadow: var(--ui-shadow-sm); overflow: hidden;
+}
+.col-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 12px 8px;
+  font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .7px; color: var(--ui-faint);
+  flex: 0 0 auto;
+}
+.col-body { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; }
+.col-foot { flex: 0 0 auto; border-top: 1px solid var(--ui-line); padding: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* behind the phone: soft pastel light (lavender, blush, mint) */
+.stage-wrap {
+  position: relative; min-height: 0;
+  border: 1px solid var(--ui-line); border-radius: var(--radius-box);
+  background:
+    radial-gradient(42% 48% at 18% 12%, color-mix(in oklch, var(--color-primary) 26%, transparent), transparent 72%),
+    radial-gradient(38% 46% at 88% 28%, color-mix(in oklch, var(--color-accent) 26%, transparent), transparent 72%),
+    radial-gradient(50% 50% at 50% 104%, color-mix(in oklch, var(--color-secondary) 30%, transparent), transparent 72%),
+    var(--color-base-100);
+  display: grid; place-items: center; overflow: auto; padding: 64px 24px 24px;
+}
+/* The phone is drawn at full size and scaled down; #previewBox takes up the
+   SCALED size, so centring and scrolling see the size you actually see. */
+#previewBox { position: relative; }
+#preview { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#preview [data-vplay] { cursor: pointer; }   /* click to listen to a voice note */
+.stage-toolbar {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 2px; align-items: center; white-space: nowrap;
+  background: color-mix(in oklch, var(--color-base-100) 82%, transparent);
+  border: 1px solid var(--ui-line);
+  border-radius: 999px; padding: 4px 6px; backdrop-filter: blur(10px); z-index: 10;
+  box-shadow: var(--ui-shadow-sm);
+}
+.transport { display: flex; gap: 2px; align-items: center; }
+.tbtn.play { width: 2.25rem; height: 2.25rem; }
+.tbtn.play.on { --d-btn-color: var(--color-error); --d-btn-fg: var(--color-error-content); }
+.tbtn.text.on { color: var(--ui-ink); background: color-mix(in oklch, var(--color-primary) 22%, transparent); }
+.tbtn .ico { display: block; }
+.tsep { width: 1px; height: 18px; background: var(--ui-line-2); margin: 0 4px; }
+.tread { font-size: 11px; color: var(--ui-dim); min-width: 104px; text-align: center; font-variant-numeric: tabular-nums; }
+.zoom-label { min-width: 40px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+.statusline {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; background: var(--ui-bg);
+  font-size: 11.5px; color: var(--ui-dim);
+}
+.statusline .ok { color: var(--ui-ok-ink); }
+.statusline .err { color: var(--ui-danger-ink); }
+
+/* --------------------------------------------------------------- widgets
+   Buttons are daisyUI (d-btn). Two additions of our own: */
+.d-btn.danger:hover { --d-btn-color: color-mix(in oklch, var(--color-error) 30%, transparent); color: var(--ui-danger-ink); }
+.d-btn .ic { width: 16px; text-align: center; flex: 0 0 auto; }
+/* "button { color: inherit }" above is unlayered, so it would beat daisyUI's
+   own text colour; give buttons theirs back (dark text on pastel fills) */
+.d-btn { color: var(--d-btn-fg); }
+/* daisyUI's soft tint is 8%, which all but vanishes with a pastel colour */
+.d-btn-soft {
+  --d-btn-bg: color-mix(in oklch, var(--d-btn-color, var(--color-base-content)) 26%, var(--color-base-100));
+  --d-btn-border: color-mix(in oklch, var(--d-btn-color, var(--color-base-content)) 45%, transparent);
+  --d-btn-fg: var(--color-base-content);
+}
+
+/* segmented controls: daisyUI box tabs (a soft tray, the chosen one raised) */
+.seg.d-tabs-box { background: color-mix(in oklch, var(--color-base-content) 6%, var(--color-base-200)); flex-wrap: nowrap; }
+.seg .d-tab { font-weight: 500; color: var(--ui-dim); white-space: nowrap; }
+/* only the chosen tab is raised: a <button> brings the browser's own grey
+   background with it, which made every tab look like a separate button */
+.d-tabs > button.d-tab:not(.d-tab-active) { background-color: transparent; }
+.seg .d-tab:hover { color: var(--ui-text); }
+.seg .d-tab.d-tab-active { color: var(--ui-text); font-weight: 600; border-color: var(--ui-line); }
+.seg.full { display: flex; width: 100%; }
+.seg.full .d-tab { flex: 1 1 0; }
+/* the chosen platform wears its own pastel */
+#platformSeg .d-tab.d-tab-active[data-platform="whatsapp"]   { --d-tab-bg: var(--color-success); color: var(--color-success-content); }
+#platformSeg .d-tab.d-tab-active[data-platform="imessage"]   { --d-tab-bg: var(--color-info);    color: var(--color-info-content); }
+#platformSeg .d-tab.d-tab-active[data-platform="tiktok"]     { --d-tab-bg: var(--color-accent);  color: var(--color-accent-content); }
+#platformSeg .d-tab.d-tab-active[data-platform="tiktoklive"] { --d-tab-bg: var(--color-error);   color: var(--color-error-content); }
+#sideSeg .d-tab.d-tab-active, #povSeg .d-tab.d-tab-active { --d-tab-bg: var(--color-primary); color: var(--color-primary-content); }
+
+/* the inspector tabs: daisyUI box tabs, stretched across the column */
+.tabs { flex: 0 0 auto; margin: 10px 10px 4px; flex-wrap: nowrap; }
+.tabs .d-tab { flex: 1 1 0; font-size: 12px; padding-inline: 4px; color: var(--ui-dim); font-weight: 500; }
+.tabs .d-tab:hover { color: var(--ui-text); }
+.tabs .d-tab.d-tab-active { color: var(--ui-text); font-weight: 600; border-color: var(--ui-line); }
+
+/* a field: daisyUI fieldset, its title a fieldset-legend */
+.field { padding: 4px 12px; }
+.field.d-fieldset { min-width: 0; margin: 0; border: 0; gap: 5px; }
+.field > label, .field > .d-fieldset-legend {
+  display: flex; align-items: center; justify-content: flex-start; gap: 0;
+  font-size: 11.5px; font-weight: 600; color: var(--ui-dim); margin: 0; padding: 4px 0 0;
+}
+.field > label { margin-bottom: 5px; }
+.field .hint { font-size: 11px; color: var(--ui-faint); margin-top: 3px; }
+.field.note, .note { font-size: 11.5px; color: var(--ui-dim); line-height: 1.5; }
+.field.note { padding-block: 7px; }
+.field.note b { color: var(--ui-text); font-weight: 600; }
+.field .row-btn { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+.field .row-btn .d-btn { flex: 1; }
+.checks { display: flex; flex-wrap: wrap; }
+.checks .check { padding-right: 4px; }
+.rng { display: flex; align-items: center; gap: 10px; }
+.rng .d-range { flex: 1 1 auto; --d-range-fill: 1; color: var(--color-primary); }
+.rng output { min-width: 46px; text-align: right; font-size: 11.5px; color: var(--ui-dim); font-variant-numeric: tabular-nums; }
+
+/* a duration typed in seconds */
+.secs { position: relative; display: flex; align-items: center; }
+.secs input { padding-right: 34px; font-variant-numeric: tabular-nums; }
+.secs span { position: absolute; right: 10px; font-size: 11px; color: var(--ui-faint); pointer-events: none; }
+
+/* the little (i) that carries a field's explanation */
+.tip {
+  display: inline-grid; place-items: center; width: 14px; height: 14px; margin-left: 5px;
+  border-radius: 50%; border: 1px solid var(--ui-line-2); color: var(--ui-faint);
+  font: 600 9px/1 Inter, sans-serif; cursor: help; vertical-align: 1px;
+  text-transform: none; letter-spacing: 0; flex: 0 0 auto;
+}
+.tip:hover, .tip:focus-visible { border-color: var(--ui-ink); color: var(--ui-ink); background: var(--ui-sel); outline: none; }
+
+.tooltip {
+  position: fixed; z-index: 400; max-width: 280px; pointer-events: none;
+  background: var(--color-neutral); color: var(--color-neutral-content);
+  border-radius: var(--radius-field); padding: 7px 10px; font-size: 12px; line-height: 1.45;
+  box-shadow: var(--ui-shadow-lg);
+  opacity: 0; transform: translateY(3px); transition: opacity .12s, transform .12s;
+}
+.tooltip.show { opacity: 1; transform: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+button.chip { cursor: pointer; color: var(--ui-text); }
+button.chip:hover { border-color: var(--ui-sel-line); background: var(--ui-sel); }
+.gen-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
+.field .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.field .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.d-input, .d-select, .d-textarea { width: 100%; }
+/* fields light up in the theme's lavender, and a switched-on toggle is
+   lavender too */
+.d-input:focus, .d-input:focus-within, .d-select:focus, .d-select:focus-within, .d-textarea:focus {
+  --d-input-color: var(--color-primary); outline-offset: 1px;
+}
+.d-toggle:not(:checked) { color: var(--ui-faint); }
+.d-toggle:checked { --d-input-color: var(--color-primary); color: var(--color-primary); }
+.d-textarea { resize: vertical; min-height: 62px; line-height: 1.4; }
+input[type=color] {
+  width: 100%; height: 2rem; padding: 3px; border: 1px solid var(--ui-line-2);
+  border-radius: var(--radius-field); background: var(--color-base-100); cursor: pointer;
+}
+input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type=color]::-webkit-color-swatch { border: 0; border-radius: calc(var(--radius-field) - 3px); }
+.check { display: flex; align-items: center; gap: 9px; padding: 6px 12px; cursor: pointer; }
+.check .d-toggle { flex: 0 0 auto; }
+.check span { font-size: 12.5px; }
+.section-title {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 12px 4px; font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--ui-ink); font-weight: 700;
+}
+.section-title::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--ui-line); }
+hr.sep { border: 0; border-top: 1px solid var(--ui-line); margin: 8px 0; }
+
+/* ------------------------------------------------------------- msg list */
+.msg-list { padding: 4px 8px 8px; display: flex; flex-direction: column; gap: 5px; }
+.mrow {
+  position: relative;
+  display: grid; grid-template-columns: 22px 1fr; gap: 7px; align-items: center;
+  background: var(--ui-panel-2); border: 1px solid transparent;
+  border-radius: var(--radius-field); padding: 7px 8px 7px 6px; cursor: pointer;
+}
+/* who sent it: a pastel bar on the left */
+.mrow::before {
+  content: ''; position: absolute; left: 3px; top: 7px; bottom: 7px; width: 3px;
+  border-radius: 3px; background: var(--ui-line-2);
+}
+.mrow:hover { background: var(--ui-hover); }
+.mrow.sel { border-color: var(--ui-sel-line); background: var(--ui-sel); box-shadow: var(--ui-shadow-sm); }
+.mrow.out::before { background: var(--color-success); }
+.mrow.in::before  { background: var(--color-info); }
+.mrow.structural::before { background: var(--ui-line-2); }
+.mrow.structural { opacity: .85; }
+.mrow .idx { font-size: 10.5px; color: var(--ui-faint); text-align: right; font-variant-numeric: tabular-nums; }
+.mrow .body { min-width: 0; }
+.mrow .kind {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--ui-dim); font-weight: 600;
+  display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden;
+}
+.mrow .kind > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.mrow .snip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; }
+/* the row tools float over the row on hover, so they never squeeze the text */
+.mrow .tools {
+  position: absolute; right: 5px; top: 4px; display: flex; gap: 1px; opacity: 0; pointer-events: none;
+  background: var(--color-base-100); border: 1px solid var(--ui-line-2); border-radius: var(--radius-field); padding: 1px;
+  box-shadow: var(--ui-shadow-sm);
+}
+.mrow:hover .tools, .mrow:focus-within .tools { opacity: 1; pointer-events: auto; }
+.mrow .tools button {
+  background: transparent; border: 0; color: var(--ui-dim); cursor: pointer;
+  padding: 2px 5px; border-radius: calc(var(--radius-field) - 2px); font-size: 12px; line-height: 1;
+}
+.mrow .tools button:hover { background: var(--ui-hover); color: var(--ui-text); }
+.mrow.drag-over { outline: 2px dashed var(--ui-accent); outline-offset: 1px; }
+.mrow .timing {
+  font-size: 10px; color: var(--ui-dim); text-transform: none; letter-spacing: 0; font-weight: 500;
+  font-variant-numeric: tabular-nums; flex: 0 0 auto;
+}
+.mrow .timing.d-badge { border-color: var(--ui-line); background: var(--color-base-100); }
+.mrow.sel .timing.d-badge { border-color: var(--ui-sel-line); }
+
+.add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
+.add-grid .d-btn { justify-content: flex-start; font-weight: 500; font-size: 12px; gap: 6px; min-width: 0; overflow: hidden; padding-inline: .55rem; white-space: nowrap; }
+.add-grid .d-btn .ic { width: 14px; }
+.add-grid .d-btn .lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.add-grid .add-more {
+  grid-column: 1 / -1; justify-content: center; font-weight: 600;
+  --d-btn-color: color-mix(in oklch, var(--color-primary) 30%, var(--color-base-100));
+  --d-btn-border: color-mix(in oklch, var(--color-primary) 55%, transparent);
+  color: var(--ui-ink);
+}
+.toolbox { display: block; padding: 0; background: color-mix(in oklch, var(--color-base-200) 60%, var(--color-base-100)); }
+.list-empty { padding: 22px 12px; color: var(--ui-dim); font-size: 12.5px; text-align: center; line-height: 1.55; }
+.mrow.status::before { background: var(--color-secondary); }
+
+/* --------------------------------------------------------- add dialog */
+.modal.add-modal { width: 520px; }
+.add-search { padding: 4px 12px 10px; }
+.add-search .d-input { width: 100%; }
+.add-list { max-height: 52vh; overflow-y: auto; padding: 0 8px; }
+.add-item {
+  display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center;
+  padding: 7px 8px; border-radius: var(--radius-field); cursor: pointer; border: 1px solid transparent;
+}
+.add-item:hover { background: var(--ui-hover); }
+.add-item.hi { background: var(--ui-sel); border-color: var(--ui-sel-line); }
+.add-item .ic { font-size: 18px; text-align: center; }
+.add-item .txt { min-width: 0; display: flex; flex-direction: column; }
+.add-item .txt b { font-weight: 600; font-size: 13px; }
+.add-item .txt i { font-style: normal; font-size: 11.5px; color: var(--ui-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.add-item .star {
+  background: transparent; border: 0; cursor: pointer; font-size: 17px; line-height: 1;
+  color: var(--ui-faint); padding: 4px 6px; border-radius: var(--radius-field);
+}
+.add-item .star:hover { color: var(--ui-warn-ink); background: color-mix(in oklch, var(--color-warning) 35%, transparent); }
+.add-item .star.on { color: var(--ui-warn-ink); }
+.foot-hint { font-size: 11px; color: var(--ui-faint); margin-right: auto; align-self: center; display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+.foot-hint .d-kbd { color: var(--ui-dim); font-size: 10px; }
+
+/* --------------------------------------------------------- dialog lists
+   Templates and People are daisyUI lists (d-list / d-list-row), made a little
+   more compact than daisyUI's default. */
+.d-list.pad { padding: 0 10px; }
+.tpl-row, .person-row.d-list-row {
+  gap: 8px; padding: 9px 8px; align-items: center; border-radius: var(--radius-field);
+}
+.tpl-row:hover, .person-row.d-list-row:hover { background: var(--ui-hover); }
+.tpl-row .name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.tpl-row .when { font-size: 10.5px; color: var(--ui-faint); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------- modal
+   daisyUI's d-modal / d-modal-box, with our own title, body and button row. */
+/* appears at once, like before: daisyUI's fade made one dialog opening
+   another (People → Edit person) blink */
+.modal-back, .modal-back .modal { z-index: 100; transition: none; animation: none; }
+.modal-back.d-modal { background-color: color-mix(in oklch, var(--ui-shade) 28%, transparent); backdrop-filter: blur(2px); }
+.modal {
+  width: 470px; max-width: 92vw; max-height: 84vh; padding: 0; overflow: auto;
+  border: 1px solid var(--ui-line); box-shadow: var(--ui-shadow-lg);
+}
+.modal h3 { margin: 0; padding: 18px 20px 6px; font-size: 15.5px; font-weight: 700; }
+.modal .mbody { padding: 6px 8px 12px; }
+.modal .mfoot {
+  padding: 12px 16px; border-top: 1px solid var(--ui-line); display: flex; gap: 8px;
+  justify-content: flex-end; align-items: center; position: sticky; bottom: 0;
+  background: color-mix(in oklch, var(--color-base-200) 55%, var(--color-base-100));
+}
+.modal .mfoot .grow { flex: 1 1 auto; }
+.modal .pad { padding: 0 12px; }
+.confirm-text { font-size: 13px; line-height: 1.6; color: var(--ui-text); padding: 6px 12px; }
+
+/* --------------------------------------------------------------- toast */
+#toast {
+  position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%) translateY(20px);
+  background: var(--color-neutral); color: var(--color-neutral-content);
+  padding: 10px 16px; border-radius: var(--radius-box); box-shadow: var(--ui-shadow-lg);
+  opacity: 0; pointer-events: none; transition: .22s; z-index: 200; max-width: 70vw;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.err { background: var(--color-error); color: var(--color-error-content); }
+#toast .link { color: var(--color-primary); font-weight: 600; cursor: pointer; text-decoration: underline; pointer-events: auto; margin-left: 8px; }
+#toast.err .link { color: inherit; }
+
+/* progress bar during export: daisyUI progress, with a spinner beside it */
+.progress-wrap { display: flex; align-items: center; gap: 8px; }
+.progress-wrap .d-loading { color: var(--ui-ink); }
+.progress-wrap .d-progress { width: 160px; height: 6px; }
+
+.emoji-pick { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 6px; }
+.emoji-pick button {
+  background: var(--ui-panel-2); border: 1px solid var(--ui-line); border-radius: var(--radius-field);
+  cursor: pointer; font-size: 15px; padding: 3px 6px; line-height: 1.1;
+}
+.emoji-pick button:hover { background: var(--ui-hover); }
+.emoji-pick button.on { border-color: var(--ui-sel-line); background: var(--ui-sel); }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; background: var(--ui-panel-2);
+  border: 1px solid var(--ui-line); border-radius: 999px; padding: 3px 9px; font-size: 11.5px;
+  margin: 2px 3px 0 0;
+}
+.chip button { background: none; border: 0; color: var(--ui-dim); cursor: pointer; padding: 0; }
+.media-thumb {
+  width: 100%; height: 84px; border-radius: var(--radius-field); border: 1px solid var(--ui-line);
+  object-fit: cover; background: var(--ui-field); display: block;
+}
+.media-thumb.file, .media-thumb.missing {
+  display: grid; place-items: center; color: var(--ui-dim); font-size: 11px; padding: 6px; text-align: center;
+}
+.media-thumb.missing { border-color: var(--color-error); color: var(--ui-danger-ink); background: color-mix(in oklch, var(--color-error) 18%, var(--color-base-100)); }
+.media-name { font-size: 11px; color: var(--ui-faint); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ------------------------------------------------------------ emoji panel */
+.emoji-panel {
+  margin: 2px 12px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--radius-box);
+  background: var(--color-base-100);
+  overflow: hidden;
+}
+.emoji-tabs { display: flex; border-bottom: 1px solid var(--ui-line); background: var(--ui-panel-2); }
+.emoji-tabs button {
+  flex: 1 1 0; background: transparent; border: 0; cursor: pointer;
+  padding: 7px 0; font-size: 15px; line-height: 1;
+  border-bottom: 2px solid transparent; opacity: .6;
+}
+.emoji-tabs button:hover { opacity: 1; background: var(--ui-hover); }
+.emoji-tabs button.on { opacity: 1; border-bottom-color: var(--ui-accent); background: var(--ui-sel); }
+.emoji-recent {
+  display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+  padding: 5px 6px; border-bottom: 1px solid var(--ui-line);
+}
+.emoji-recent > span {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .6px;
+  color: var(--ui-faint); margin-right: 4px;
+}
+.emoji-grid {
+  display: grid; grid-template-columns: repeat(9, 1fr);
+  gap: 1px; padding: 5px; max-height: 178px; overflow-y: auto;
+}
+
+.emoji-panel button[data-emo] {
+  background: transparent; border: 0; cursor: pointer;
+  font-size: 17px; line-height: 1; padding: 4px 0; border-radius: 6px;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
+.emoji-panel button[data-emo]:hover { background: var(--ui-hover); transform: scale(1.18); }
+/* the set drop-down, the possum faces' bigger grid, EmojiOne's credit */
+.emoji-set {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  border-bottom: 1px solid var(--ui-line); background: var(--ui-panel-2);
+}
+.emoji-set label { font-size: 11px; font-weight: 600; color: var(--ui-dim); white-space: nowrap; }
+.emoji-set .d-select { flex: 1 1 auto; width: auto; }
+.emoji-grid.big { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.emoji-grid.big button[data-emo] { font-size: 30px; padding: 4px 0; }
+.emoji-credit { font-size: 10px; color: var(--ui-faint); padding: 4px 8px 6px; border-top: 1px solid var(--ui-line); }
+.emoji-recent button[data-emo] { font-size: 15px; }
+/* emoji pictures (core/emoji.js) in the editor; the phone's own rule
+   (.phone img.emo, more specific) wins inside the phone */
+img.emo {
+  display: inline-block; width: 1.25em; height: 1.25em; margin: 0;
+  vertical-align: -.25em; object-fit: contain; pointer-events: none;
+}
+
+/* --------------------------------------------------------- crop / preview */
+.crop-wrap { display: grid; place-items: center; padding: 12px 10px 6px; }
+.crop-stage {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-field);
+  box-shadow: var(--ui-shadow-lg);
+  background: #000;
+  touch-action: none;
+}
+.crop-scaler { position: absolute; left: 0; top: 0; transform-origin: top left; }
+.crop-overlay { position: absolute; inset: 0; }
+.crop-shade { position: absolute; background: rgba(10,12,16,.72); pointer-events: none; }
+.crop-box {
+  position: absolute; pointer-events: none;
+  outline: 1px solid rgba(255,255,255,.9);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+}
+.crop-handle { position: absolute; background: transparent; }
+.crop-handle::after {
+  content: ''; position: absolute; background: var(--ui-accent);
+  border-radius: 3px; box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+}
+.crop-handle.h-top, .crop-handle.h-bottom { height: 14px; margin-top: -7px; cursor: ns-resize; }
+.crop-handle.h-left, .crop-handle.h-right { width: 14px; margin-left: -7px; cursor: ew-resize; }
+.crop-handle.h-top::after, .crop-handle.h-bottom::after {
+  left: 50%; margin-left: -16px; top: 5px; width: 32px; height: 4px;
+}
+.crop-handle.h-left::after, .crop-handle.h-right::after {
+  top: 50%; margin-top: -16px; left: 5px; width: 4px; height: 32px;
+}
+.field .row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.minilab {
+  display: block; font-size: 10px; text-transform: uppercase; font-weight: 600;
+  letter-spacing: .5px; color: var(--ui-faint); margin-bottom: 3px;
+}
+
+/* ------------------------------------------------------- photo framing */
+.fit-thumb {
+  width: 92px; height: 92px; overflow: hidden;
+  border: 1px solid var(--ui-line); background: var(--ui-field);
+  border-radius: var(--radius-box); margin: 0 auto;
+}
+.fit-thumb.round { border-radius: 50%; }
+.fit-wrap { display: grid; place-items: center; padding: 16px 10px 8px; }
+.fit-view {
+  position: relative; overflow: hidden;
+  background: var(--ui-field);
+  border-radius: var(--radius-box);
+  cursor: grab;
+  touch-action: none;
+  box-shadow: var(--ui-shadow-lg);
+  user-select: none;
+}
+.fit-view.round { border-radius: 50%; }
+.fit-view.grabbing { cursor: grabbing; }
+.fit-view img, .fit-view video { pointer-events: none; }
+/* a clip framed in the media block previews the same way a photo does */
+.fit-thumb video { width: 100%; height: 100%; display: block; }
+.fit-guides { position: absolute; inset: 0; pointer-events: none; }
+.fit-guides::before, .fit-guides::after {
+  content: ''; position: absolute; background: rgba(255,255,255,.22);
+}
+.fit-guides::before { left: 33.33%; right: 33.33%; top: 0; bottom: 0; border-left: 1px solid rgba(255,255,255,.22); border-right: 1px solid rgba(255,255,255,.22); background: none; }
+.fit-guides::after  { top: 33.33%; bottom: 33.33%; left: 0; right: 0; border-top: 1px solid rgba(255,255,255,.22); border-bottom: 1px solid rgba(255,255,255,.22); background: none; }
+
+/* ------------------------------------------------------------ scene strip */
+.scene-strip {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 5px;
+  padding: 2px 8px 8px; overflow-x: auto;
+  border-bottom: 1px solid var(--ui-line);
+}
+.scene-chip {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 6px;
+  background: var(--ui-panel-2); border: 1px solid var(--ui-line);
+  border-radius: 999px; padding: 4px 9px 4px 5px; cursor: pointer;
+  font-size: 12px; max-width: 132px;
+}
+.scene-chip:hover { background: var(--ui-hover); }
+.scene-chip.on { border-color: var(--ui-sel-line); background: var(--ui-sel); font-weight: 600; }
+.scene-chip .n {
+  width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--ui-line-2); color: var(--ui-dim);
+  display: grid; place-items: center; font-size: 10px; font-weight: 700;
+}
+.scene-chip.on .n { background: var(--color-primary); color: var(--color-primary-content); }
+.scene-chip .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scene-chip .tr { font-size: 10px; color: var(--ui-faint); flex: 0 0 auto; }
+.scene-chip .x { background: none; border: 0; color: var(--ui-dim); cursor: pointer; padding: 0 1px; font-size: 12px; opacity: 0; }
+.scene-chip:hover .x, .scene-chip.on .x { opacity: 1; }
+.scene-chip .x:hover { color: var(--ui-danger-ink); }
+.scene-chip.drag-over { outline: 2px dashed var(--ui-accent); outline-offset: 1px; }
+/* a step that goes back to a scene already shown — the double-take */
+.scene-chip.revisit { border-style: dashed; }
+.scene-chip.revisit .nm { color: var(--ui-dim); font-style: italic; }
+.scene-chip.revisit .n { background: color-mix(in oklch, var(--color-accent) 45%, var(--color-base-100)); color: var(--ui-text); }
+.scene-chip.revisit.on .n { background: var(--color-accent); color: var(--color-accent-content); }
+.scene-chip .wt {
+  font-size: 9.5px; color: var(--ui-dim); background: var(--ui-line);
+  border-radius: 999px; padding: 1px 5px; flex: 0 0 auto;
+}
+.scene-add {
+  flex: 0 0 auto; background: transparent; border: 1px dashed var(--ui-line-2);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer; color: var(--ui-dim); font-size: 12px;
+}
+.scene-add:hover { color: var(--ui-ink); border-color: var(--ui-sel-line); background: var(--ui-sel); }
+
+/* ------------------------------------------------------------ people list */
+.person-row {
+  display: flex; align-items: center; gap: 9px; padding: 7px 8px;
+  border: 1px solid var(--ui-line); border-radius: var(--radius-field);
+  background: var(--ui-panel-2); margin-bottom: 6px;
+}
+.person-row.d-list-row { border: 0; background: transparent; margin: 0; display: grid; }
+.person-row.sel { border-color: var(--ui-sel-line); background: var(--ui-sel); }
+.person-av {
+  width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+  background: color-mix(in oklch, var(--color-primary) 35%, var(--color-base-100)); display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; color: var(--ui-ink);
+}
+.person-av .fitimg { width: 100%; height: 100%; }
+.person-meta { flex: 1 1 auto; min-width: 0; }
+.person-meta .d { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.person-meta .h { font-size: 11px; color: var(--ui-dim); }
+.person-meta .h i { opacity: .6; }
+.person-meta .verified { color: var(--ui-info-ink); }
+.person-edit-av { display: grid; place-items: center; padding-top: 14px; gap: 8px; }
+.person-edit-av .row3 { width: 100%; }
+
+/* ---------------------------------------------------------- web export
+   The phone is rendered here, far off-screen, while the web build exports. */
+.export-host { position: fixed; left: -100000px; top: 0; pointer-events: none; }
+.export-stage { position: relative; overflow: hidden; }
+.export-inner { position: absolute; left: 0; top: 0; }
+.export-inner .device { display: block; }
+
+.statusline .ver { color: var(--ui-faint); margin-left: 10px; }
+.col-head .spacer { flex: 1; }
+
+/* narrow windows: the side columns give up some room first */
+@media (max-width: 1280px) {
+  .main { grid-template-columns: 260px 1fr 310px; gap: 8px; padding: 0 8px; }
+  .topbar .brand { display: none; }
+}
+@media (max-width: 1100px) {
+  .tread { display: none; }
+}
+.person-row .acts { display: flex; gap: 4px; flex: 0 0 auto; }
+.person-empty { padding: 14px 10px; color: var(--ui-dim); font-size: 12.5px; text-align: center; }
+.pick-row { display: flex; gap: 6px; align-items: center; }
+.pick-row select { flex: 1 1 auto; }
+
+/* ---------------------------------------------------------- narrow screens
+   Phones and portrait tablets (hand-over issue 14). The three columns become
+   three panels — Messages, Preview, Edit — and the daisyUI dock at the bottom
+   switches between them (main.js, E.showPane). Wider screens never see any of
+   this. */
+.mobile-nav, .mobile-nav.d-dock { display: none; }
+.narrow-only { display: none; }
+
+@media (max-width: 1023px) {
+  #app { grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; height: 100dvh; }
+  .statusline { display: none; }
+
+  /* top bar: platform and theme on one line, the actions wrap below */
+  .topbar { flex-wrap: wrap; gap: 6px; padding: 6px 8px; background: var(--ui-panel); border-bottom: 1px solid var(--ui-line); }
+  .topbar .brand, .topbar .spacer { display: none; }
+  #platformSeg { flex: 1 1 auto; min-width: 0; }
+  #platformSeg .d-tab { flex: 1 1 0; min-width: 0; padding-inline: .2rem; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+  #themeSeg .d-tab { padding-inline: .45rem; font-size: 11px; }
+  .topbar > .d-btn { flex: 0 0 auto; height: 1.85rem; padding-inline: .5rem; font-size: 12px; }
+  /* the light/dark switch rides on the first line, after the phone's light/dark */
+  .topbar > * { order: 4; }
+  #platformSeg { order: 1; }
+  #themeSeg { order: 2; }
+  .app-theme { order: 3; margin-left: 0; padding-left: 2px; border-left: 0; gap: 0; }
+  .app-theme svg { display: none; }
+  .progress-wrap { flex: 1 1 100%; }
+  .progress-wrap .d-progress { flex: 1 1 auto; width: auto; }
+
+  /* one panel at a time, edge to edge */
+  .main { display: block; position: relative; padding: 0; }
+  .main > .col, .main > .stage-wrap { display: none; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  #app[data-pane="list"] .col.left,
+  #app[data-pane="edit"] .col.right { display: flex; }
+  #app[data-pane="preview"] .stage-wrap { display: grid; }
+  .stage-wrap { padding: 54px 8px 12px; }
+  .stage-toolbar { max-width: calc(100% - 16px); }
+  /* the phone always fits its panel here, so no manual zoom */
+  #zoomOut, #zoomIn, #zoomLabel, #zoomFit, #tpRead + .tsep { display: none; }
+  .wide-only { display: none; }
+  .narrow-only { display: inline; }
+
+  /* the daisyUI dock, in the page's flow instead of fixed to the window */
+  .mobile-nav.d-dock {
+    display: flex; position: static; height: auto;
+    padding: 4px 0 env(safe-area-inset-bottom);
+    background: var(--ui-panel); border-top: 1px solid var(--ui-line);
+  }
+  .mobile-nav.d-dock > button {
+    height: auto; margin: 0; padding: 7px 0 9px; gap: 2px; border: 0; background: none;
+    color: var(--ui-dim); font-weight: 500;
+  }
+  .mobile-nav.d-dock > button.d-dock-active { color: var(--ui-ink); }
+  .mobile-nav.d-dock .d-dock-label { font-size: 11px; }
+  .mobile-nav svg { display: block; }
+
+  .modal { max-width: calc(100vw - 20px); max-height: calc(100dvh - 24px); }
+}
+
+/* phones: line 1 is platform (60% to start, so the buttons can't squeeze onto
+   it) + light/dark; line 2 is the five buttons, sharing the width */
+@media (max-width: 599px) {
+  #platformSeg { flex: 1 1 60%; }
+  .topbar > .d-btn { flex: 1 1 auto; }
+}
+
+/* touch screens: nothing may depend on hovering */
+@media (hover: none) {
+  .mrow.sel .tools { opacity: 1; pointer-events: auto; }
+  .mrow .tools button { padding: 6px 8px; font-size: 13px; }
+  .scene-chip .x { opacity: 1; }
+}
+/* iPhones zoom the whole page into any field with text smaller than 16px */
+@media (pointer: coarse) {
+  .d-input, .d-select, .d-textarea, .add-search .d-input { font-size: 16px; }
+}
