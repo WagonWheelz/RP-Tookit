@@ -191,6 +191,24 @@
       const was = p.platform;
       p.platform = btn.dataset.platform;
       const nowTT = S.isTT(p.platform), wasTT = S.isTT(was);
+      const nowYT = S.isYT && S.isYT(p.platform), wasYT = S.isYT && S.isYT(was);
+
+      // The watch page and the chat families share nothing: no message list,
+      // no bubbles, a desktop canvas instead of a phone. Moving across that
+      // line reseeds the scenes rather than converting them.
+      if (nowYT !== wasYT) {
+        p.scenes.forEach(sc => {
+          if (sc.ref) { sc.ref = null; return; }
+          sc.chat = S.defaultChat(p.platform);
+          sc.messages = S.defaultMessages(p.platform);
+        });
+        p.active = 0;
+        p.theme = 'dark';
+        E.selectedId = null;
+        S.bindScene(p, 0);
+        E.tab = nowYT ? 'video' : 'message';
+        E.dirty = true; E.renderAll(); return;
+      }
 
       // Platform is project-wide, so EVERY scene has to come along. Converting
       // only the active one leaves the scenes you aren't looking at holding
@@ -247,6 +265,14 @@
       case 'import': return E.importInto(btn.dataset.target, btn.dataset.kind);
       case 'fit': return E.openFit(btn.dataset.target, !!btn.dataset.round);
       case 'clearmedia': E.setPath(btn.dataset.target, null); E.renderAll(); return;
+      case 'ytsize': {
+        // The watch page has one canvas for the whole project, like the phone
+        // does — set it in both places so export sizing agrees.
+        p.chat.width = Number(btn.dataset.w) || 1280;
+        p.chat.height = Number(btn.dataset.h) || 720;
+        S.syncSceneGeometry(p);
+        E.dirty = true; E.renderAll(); return;
+      }
       case 'react': {
         const m = E.selected(); if (!m) return;
         const em = btn.dataset.emoji;

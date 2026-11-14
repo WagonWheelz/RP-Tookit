@@ -37,6 +37,9 @@
 
   const TT_PLATFORMS = ['tiktok', 'tiktoklive'];
   const isTT = (p) => TT_PLATFORMS.indexOf(p) >= 0;
+  // A desktop watch page: one fixed layout, no message list, nothing to animate.
+  const YT_PLATFORMS = ['youtube'];
+  const isYT = (p) => YT_PLATFORMS.indexOf(p) >= 0;
   const typesFor = (platform) => (isTT(platform) ? MESSAGE_TYPES_TT : MESSAGE_TYPES);
 
   const TT_LAYOUTS = [
@@ -101,6 +104,14 @@
                header: 'transparent', headerText: '#ffffff', meta: 'rgba(255,255,255,.7)', accent: '#fe2c55', inputBg: 'rgba(255,255,255,.14)', bodyPattern: false },
       light: { bg: '#000000', bubbleIn: 'rgba(0,0,0,.5)', bubbleOut: '#fe2c55', textIn: '#ffffff', textOut: '#ffffff',
                header: 'transparent', headerText: '#ffffff', meta: 'rgba(255,255,255,.85)', accent: '#fe2c55', inputBg: 'rgba(0,0,0,.4)', bodyPattern: false }
+    },
+    // The watch page is measured off the real thing: #0f0f0f / #f1f1f1 dark,
+    // #ffffff / #0f0f0f light, with the pill colour as the raised surface.
+    youtube: {
+      dark:  { bg: '#0f0f0f', bubbleIn: '#272727', bubbleOut: '#3ea6ff', textIn: '#f1f1f1', textOut: '#f1f1f1',
+               header: '#0f0f0f', headerText: '#f1f1f1', meta: '#aaaaaa', accent: '#ff0033', inputBg: '#121212', bodyPattern: false },
+      light: { bg: '#ffffff', bubbleIn: '#f2f2f2', bubbleOut: '#065fd4', textIn: '#0f0f0f', textOut: '#0f0f0f',
+               header: '#ffffff', headerText: '#0f0f0f', meta: '#606060', accent: '#ff0033', inputBg: '#f8f8f8', bodyPattern: false }
     }
   };
 
@@ -238,8 +249,67 @@
     };
   }
 
+  // Everything the watch page shows. Kept here rather than in youtube.js so a
+  // saved project always has the fields, even before the module paints it.
+  function defaultYT() {
+    return {
+      title: 'This is what the video title looks like on a watch page',
+      channel: 'Channel name',
+      handle: '@channel',
+      subs: '1.2M subscribers',
+      views: '482,391 views',
+      date: 'Premiered 2 days ago',
+      likes: '18K',
+      description: 'The description sits under the action buttons. Put the video blurb, the links, the timestamps and the credits here — the mockup keeps the same collapsed height so the layout never shifts.',
+      comments: '2,418',
+      duration: '12:34',
+      video: null,
+      thumb: null,
+      avatar: null,
+      sidebar: [
+        { title: 'A recommended video sits here, two lines of title at most', channel: 'Another channel', meta: '1.4M views · 3 days ago', thumb: null, duration: '8:21' },
+        { title: 'Second recommendation in the rail', channel: 'Another channel', meta: '88K views · 1 week ago', thumb: null, duration: '4:07' },
+        { title: 'Third recommendation, same card shape', channel: 'Another channel', meta: '2.2M views · 2 weeks ago', thumb: null, duration: '21:15' },
+        { title: 'Fourth recommendation fills the rail', channel: 'Another channel', meta: '310K views · 1 month ago', thumb: null, duration: '9:58' }
+      ]
+    };
+  }
+
   function defaultChat(platform) {
     const p = PRESETS[platform].light;
+    // A watch page is a desktop canvas: 1280x720 unless the project says
+    // otherwise, no status bar, no input bar, no chat chrome at all.
+    if (isYT(platform)) {
+      return {
+        contactName: 'Channel name',
+        contactSubtitle: '',
+        avatar: null,
+        groupChat: false,
+        wallpaper: { mode: 'color', color: '#0f0f0f', image: null, blur: 0, dim: 0 },
+        colors: Object.assign({}, PRESETS[platform].dark),
+        customColors: false,
+        font: 'roboto',
+        fontScale: 1,
+        uiScale: 1,
+        bubbleRadius: 8,
+        showTails: false,
+        showStatusBar: false,
+        statusBar: { time: '9:41', battery: 82, charging: false, signal: 4, wifi: true, carrier: '' },
+        showHeader: false,
+        showInputBar: false,
+        pov: 'observer',
+        keyboard: 'auto',
+        keyboardAlways: false,
+        inputPlaceholder: '',
+        headerTyping: false,
+        device: 'none',
+        width: 1280,
+        height: 720,
+        scrollTop: 0,
+        yt: defaultYT(),
+        brand: defaultBrand()
+      };
+    }
     if (isTT(platform)) {
       return {
         contactName: 'nova.plays',
@@ -476,6 +546,8 @@
   }
 
   function defaultMessages(platform) {
+    // A watch page has no message list — nothing to time, nothing to animate.
+    if (isYT(platform)) return [];
     if (platform === 'tiktoklive') {
       return [
         defaultMessage({ type: 'join',    user: 'kayla_ww', anim: { delay: 700, typing: 0, effect: 'slide' } }),
@@ -954,7 +1026,7 @@
 
   window.Store = {
     uid, defaultFit, fitMode, KEYBOARD_EMOJI, isEmojiChar, graphemes, hash32,
-    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, TT_LAYOUTS, TT_GIFTS,
+    MESSAGE_TYPES, MESSAGE_TYPES_TT, typesFor, isTT, isYT, TT_LAYOUTS, TT_GIFTS,
     PLATFORM_NAMES, brandName, convertMessages,
     REACH, fmtCount, genStats,
     TRANSITIONS, transitionMs, defaultScene, bindScene, pack, syncSceneGeometry,
@@ -962,7 +1034,7 @@
     VIDEO_EXT, AUDIO_EXT, isVideoMedia, isAudioMedia, isTimeBased, mediaMs, stageMedia,
     defaultPerson, migratePerson, personLabel, findPerson,
     EFFECTS, FONTS, PRESETS, DEVICES, RESOLUTIONS, FRAME_PAD, CHOICES,
-    defaultProject, defaultMessage, defaultMessages, defaultChat, defaultTT, defaultBrand, defaultCell,
+    defaultProject, defaultMessage, defaultMessages, defaultChat, defaultTT, defaultYT, defaultBrand, defaultCell,
     migrate, paletteFor, outerSize, resolveScale, screenW, screenH
   };
 })();

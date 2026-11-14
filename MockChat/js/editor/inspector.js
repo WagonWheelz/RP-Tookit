@@ -383,6 +383,7 @@
   function inspectorChat() {
     const p = E.project;
     if (S.isTT(p.platform)) return inspectorScreen();
+    if (S.isYT && S.isYT(p.platform)) return inspectorVideo();
     const c = p.chat;
     let h = html``;
     h = cat(h, section('Point of view'));
@@ -659,8 +660,65 @@
     return h;
   }
 
+
+  // ------------------------------------------------------------- watch page
+  // Everything on a YouTube watch page is a field, so the whole thing can be
+  // re-skinned for a different upload without touching the layout.
+  function inspectorVideo() {
+    const p = E.project;
+    const c = p.chat;
+    const yt = c.yt || (c.yt = (S.defaultYT ? S.defaultYT() : {}));
+    let h = html``;
+
+    h = cat(h, section('Canvas'));
+    h = cat(h, fld('Size', cat(html`<div class="seg full d-tabs d-tabs-box d-tabs-sm" role="tablist" aria-label="Canvas size">`,
+      html`<button data-act="ytsize" data-w="1280" data-h="720" role="tab" class="d-tab ${(c.width === 1280 && c.height === 720 ? 'on d-tab-active' : '')}">1280 × 720</button>`,
+      html`<button data-act="ytsize" data-w="1920" data-h="1080" role="tab" class="d-tab ${(c.width === 1920 && c.height === 1080 ? 'on d-tab-active' : '')}">1920 × 1080</button>`,
+      html`<button data-act="ytsize" data-w="854" data-h="480" role="tab" class="d-tab ${(c.width === 854 ? 'on d-tab-active' : '')}">854 × 480</button></div>`),
+      'The page is drawn at 1280×720 and scaled to the canvas you pick. 1920×1080 exports at full size.'));
+
+    h = cat(h, section('The video'));
+    h = cat(h, mediaBlock('chat.yt.video', 'video', 'Video file', null,
+      'Played muted and looped in the player. Leave it empty to use a still thumbnail only.'));
+    h = cat(h, mediaBlock('chat.yt.thumb', 'image', 'Thumbnail / poster', null,
+      'Shown before the video is importable, and as the poster frame behind it.'));
+    h = cat(h, fld('Duration', txt('chat.yt.duration', '12:34'), 'The time on the right of the player controls and on sidebar cards.'));
+
+    h = cat(h, section('Title and channel'));
+    h = cat(h, fld('Video title', area('chat.yt.title', 'Video title', 2)));
+    h = cat(h, mediaBlock('chat.yt.avatar', 'image', 'Channel picture', 'round'));
+    h = cat(h, fld('Channel name', txt('chat.yt.channel', 'Channel name')));
+    h = cat(h, fld('Handle', txt('chat.yt.handle', '@channel')));
+    h = cat(h, fld('Subscribers', txt('chat.yt.subs', '1.2M subscribers')));
+
+    h = cat(h, section('Numbers'));
+    h = cat(h, fld('Views', txt('chat.yt.views', '482,391 views')));
+    h = cat(h, fld('Date line', txt('chat.yt.date', 'Premiered 2 days ago')));
+    h = cat(h, fld('Likes', txt('chat.yt.likes', '18K')));
+    h = cat(h, fld('Comments', txt('chat.yt.comments', '2,418')));
+
+    h = cat(h, section('Description'));
+    h = cat(h, fld('Text', area('chat.yt.description', 'Description', 4),
+      'Shown collapsed to three lines, the way the real page does it.'));
+
+    h = cat(h, section('Up next'));
+    (yt.sidebar || []).forEach((item, i) => {
+      h = cat(h, fld('Card ' + (i + 1),
+        cat(html`<div class="row2" style="gap:6px">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.yt.sidebar.${i}.title" value="${item.title || ''}" placeholder="Title">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.yt.sidebar.${i}.channel" value="${item.channel || ''}" placeholder="Channel"></div>`,
+        html`<div class="row2" style="gap:6px;margin-top:6px">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.yt.sidebar.${i}.meta" value="${item.meta || ''}" placeholder="1.4M views · 3 days ago">`,
+          html`<input class="d-input d-input-xs" type="text" data-path="chat.yt.sidebar.${i}.duration" value="${item.duration || ''}" placeholder="8:21"></div>`)));
+      h = cat(h, mediaBlock('chat.yt.sidebar.' + i + '.thumb', 'image', 'Card ' + (i + 1) + ' picture'));
+    });
+
+    h = cat(h, note(html`This page has no message list, so there is nothing to animate — export it as an image.`));
+    return h;
+  }
+
   E.renderInspector = function () {
-    const map = { message: inspectorMessage, chat: inspectorChat, style: inspectorStyle, timeline: inspectorTimeline, export: inspectorExport };
+    const map = { message: inspectorMessage, chat: inspectorChat, style: inspectorStyle, timeline: inspectorTimeline, export: inspectorExport, video: inspectorVideo };
     const host = E.$('#inspector');
     const keep = host.scrollTop;
     // re-rendering the same form (after a checkbox, say) keeps your place;
@@ -677,6 +735,12 @@
       b.setAttribute('aria-selected', b.dataset.tab === E.tab ? 'true' : 'false');
       if (b.dataset.tab === 'chat') {
         b.textContent = S.isTT(E.project.platform) ? (E.project.platform === 'tiktoklive' ? 'Live' : 'Video') : 'Chat';
+      }
+      // the watch-page panel only exists for a watch page
+      if (b.dataset.tab === 'video') {
+        const on = !!(S.isYT && S.isYT(E.project.platform));
+        b.style.display = on ? '' : 'none';
+        if (!on && E.tab === 'video') E.tab = 'chat';
       }
     });
   };
