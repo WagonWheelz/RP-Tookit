@@ -11,7 +11,7 @@
   const cat = (...parts) => join(parts);         // several html`` pieces as one
   const esc = window.HTML.escText;
 
-  // WhatsApp-ish inline formatting: *bold* _italic_ ~strike~ ```mono```
+  // Chat-style inline formatting: *bold* _italic_ ~strike~ ```mono```
   // The text is escaped FIRST; only these fixed tags are then put around it.
   function fmt(str) {
     let t = esc(str);
@@ -53,7 +53,6 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  const DOODLE = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='380' viewBox='0 0 380 380'%3E%3Cg fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M30 40c8-10 20-10 28 0M40 90l10 12 10-12M120 30c6 0 10 4 10 10s-4 10-10 10-10-4-10-10'/%3E%3Ccircle cx='210' cy='55' r='11'/%3E%3Cpath d='M270 40h26v20h-26zM290 70l8 10M60 160c10-14 26-14 36 0M150 150l14 14-14 14-14-14zM230 145h30l-6 24h-18zM320 160c0 8-6 14-14 14M40 250c14-8 30-8 44 0M130 245l16 8-16 8zM215 240h26v22h-26zM300 250c8-6 18-6 26 0M70 330c8-10 22-10 30 0M160 320l12 14 12-14M250 322h24v18h-24zM330 330c0 7-5 12-12 12'/%3E%3C/g%3E%3C/svg%3E\")";
 
   // ---------------------------------------------------------------- chassis
   // (style.setProperty is not markup: a value can only ever be a CSS value)
@@ -260,14 +259,9 @@
 
   function voiceHTML(m, project) {
     const bars = waveBars(m.id + (m.media ? m.media.name : ''), 32);
-    const avatar = project.chat.avatar;
     const wave = html`<div class="wave" data-wave>${bars.map((h, i) => html`<i data-bar="${i}" style="height:${h}px"></i>`)}</div>`;
-    // WhatsApp shows the sender's photo beside an incoming voice note; iMessage does not
-    const av = (m.side === 'in' && project.platform === 'whatsapp')
-      ? html`<div class="v-avatar">${fitImg(avatar)}</div>`
-      : '';
     return cat(html`<div class="voice" data-voice data-dur="${num(m.duration, 0) || 8}"${m.media ? html` data-src="${src(m.media)}"` : ''}>`,
-      html`${av}<div class="v-play" data-vplay>${I.play({ w: 22, h: 22 })}</div>`,
+      html`<div class="v-play" data-vplay>${I.play({ w: 22, h: 22 })}</div>`,
       html`<div class="v-main">${wave}<div class="v-foot"><span data-vtime>${mmss(m.duration)}</span>`,
       html`${m.time && project.platform !== 'imessage' ? html`<span>${m.time} ${m.side === 'out' ? ticksHTML(m, project) : ''}</span>` : ''}`,
       html`</div></div></div>`);
@@ -362,13 +356,6 @@
 
     const isMedia = ['image', 'gif', 'sticker', 'video'].indexOf(m.type) >= 0;
     const parts = [];
-
-    // group avatar for incoming messages
-    if (project.chat.groupChat && m.side === 'in' && project.platform === 'whatsapp') {
-      parts.push(ctx.isTail
-        ? avatarHTML(project.chat.avatar, m.sender || project.chat.contactName, 'av')
-        : html`<div class="av ghost"></div>`);
-    }
 
     const bubble = [];
     if (m.forwarded) bubble.push(html`<div class="fwd">${I.forward({ w: 12, h: 12 })}<span>Forwarded</span></div>`);
@@ -480,11 +467,6 @@
     if (wp.mode === 'image' && wp.image) {
       setHTML(wall, fitImg(wp.image));
       if (wp.blur) wall.style.filter = 'blur(' + num(wp.blur, 0) + 'px)';
-    } else if (wp.mode === 'default' && project.platform === 'whatsapp') {
-      wall.classList.add('pattern');
-      wall.style.setProperty('--wall-pattern', DOODLE);
-      wall.style.setProperty('--wall-pattern-opacity', project.theme === 'dark' ? '0.055' : '0.06');
-      if (project.theme === 'dark') wall.classList.add('inv');
     } else if (wp.mode === 'color') {
       wall.style.background = wp.color;
     }

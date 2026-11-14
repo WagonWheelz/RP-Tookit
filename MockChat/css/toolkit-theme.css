@@ -6,7 +6,7 @@
    editor chrome in the toolkit's type: Oswald for headings, labels and tabs,
    Roboto for everything else.
 
-   Nothing here touches the phone: css/phone.css, whatsapp.css, imessage.css
+   Nothing here touches the phone: css/phone.css, imessage.css
    and tiktok.css still paint the mockups, and the export host renders with
    body's font stack, so exported images and clips are unchanged.
 
@@ -151,7 +151,6 @@
 }
 
 /* the platform tabs wear the faction accents, as on the landing page */
-#platformSeg .d-tab.d-tab-active[data-platform="whatsapp"]   { --d-tab-bg: var(--color-primary); color: var(--color-primary-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="imessage"]   { --d-tab-bg: var(--color-info);    color: var(--color-info-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="tiktok"]     { --d-tab-bg: var(--color-accent);  color: var(--color-accent-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="tiktoklive"] { --d-tab-bg: var(--color-error);   color: var(--color-error-content); }

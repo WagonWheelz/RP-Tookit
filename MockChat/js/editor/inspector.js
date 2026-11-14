@@ -191,7 +191,7 @@
         h = cat(h, html`<div class="field chips">${hjoin(STATUS_CHIPS.map(c =>
           html`<button class="chip" data-act="statuschip" data-v="${c}">${(c ? esc(c) : html`<i>hide it</i>`)}</button>`))}</div>`);
         if (p.platform === 'imessage') {
-          h = cat(h, note('iMessage does not show a status line under the name, so this only shows on WhatsApp.'));
+          h = cat(h, note('iMessage does not show a status line under the name.'));
         } else if (!p.chat.showHeader) {
           h = cat(h, note('The chat header is turned off (Chat tab), so there is no status line to change.'));
         }
@@ -209,7 +209,7 @@
         html`${mini('Status', sel('msg.status', [
           { id: 'none', label: 'Hidden' }, { id: 'pending', label: 'Sending' }, { id: 'sent', label: 'Sent ✓' },
           { id: 'delivered', label: 'Delivered ✓✓' }, { id: 'read', label: 'Read ✓✓ blue' }]),
-          'The ticks on WhatsApp; on iMessage, the “Delivered / Read” line under your newest message')}</div></div>`));
+          'Ticks mark delivery; on iMessage this is the “Delivered / Read” line under your newest message')}</div></div>`));
       if (p.chat.groupChat) {
         h = cat(h, E.personPick('sender'));
         h = cat(h, fld('Sender name', txt('msg.sender', 'Alex')));
@@ -402,7 +402,7 @@
     h = cat(h, E.personPick('contact'));
     h = cat(h, fld('Name', txt('chat.contactName', 'Jamie')));
     h = cat(h, fld('Status at the start', txt('chat.contactSubtitle', 'online'),
-      'The line under the name in the WhatsApp header. To change it during the conversation, add a “Status change” step.'));
+      'The line under the name in the chat header. To change it during the conversation, add a “Status change” step.'));
     if (p.platform !== 'imessage') {
       h = cat(h, html`<div class="field"><button class="d-btn d-btn-xs d-btn-block" data-act="addstatus" data-tip="Adds a step after the selected message that changes the status line">＋ Change the status mid-chat</button></div>`);
     }

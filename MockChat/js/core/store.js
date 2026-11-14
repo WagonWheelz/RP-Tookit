@@ -82,12 +82,6 @@
   ];
 
   const PRESETS = {
-    whatsapp: {
-      light: { bg: '#efe7de', bubbleIn: '#ffffff', bubbleOut: '#d9fdd3', textIn: '#111b21', textOut: '#111b21',
-               header: '#f0f2f5', headerText: '#111b21', meta: '#667781', accent: '#25d366', inputBg: '#ffffff', bodyPattern: true },
-      dark:  { bg: '#0b141a', bubbleIn: '#202c33', bubbleOut: '#005c4b', textIn: '#e9edef', textOut: '#e9edef',
-               header: '#202c33', headerText: '#e9edef', meta: '#8696a0', accent: '#00a884', inputBg: '#2a3942', bodyPattern: true }
-    },
     imessage: {
       light: { bg: '#ffffff', bubbleIn: '#e9e9eb', bubbleOut: '#1c8cf8', textIn: '#000000', textOut: '#ffffff',
                header: '#f6f6f6', headerText: '#000000', meta: '#8e8e93', accent: '#1c8cf8', inputBg: '#ffffff', bodyPattern: false },
@@ -286,7 +280,7 @@
       wallpaper: { mode: 'default', color: p.bg, image: null, blur: 0, dim: 0 },
       colors: Object.assign({}, p),
       customColors: false,
-      font: platform === 'whatsapp' ? 'roboto' : 'inter',
+      font: 'inter',
       fontScale: 1,
       uiScale: 1,
       bubbleRadius: platform === 'imessage' ? 18 : 8,
@@ -441,7 +435,7 @@
   }
 
   function defaultProject(platform) {
-    platform = platform || 'whatsapp';
+    platform = platform || 'imessage';
     const proj = {
       version: 1,
       meta: { name: 'Untitled mockup', created: Date.now() },
@@ -777,7 +771,7 @@
     // outside data: the guard, then media reduced to names (core/mediaref.js)
     data = window.MediaRef.ingest(clean(data || {}));
     // an unknown platform or theme has no palette and stops the editor dead
-    const platform = PRESETS[data.platform] ? data.platform : 'whatsapp';
+    const platform = PRESETS[data.platform] ? data.platform : 'imessage';
     data.platform = platform;
     if (data.theme != null && !PRESETS[platform][data.theme]) delete data.theme;
     const base = defaultProject(platform);
@@ -950,7 +944,7 @@
   // The app's own name for each screen, used wherever the UI says it out loud.
   // Overridden by the parody brand name when one is set.
   const PLATFORM_NAMES = {
-    whatsapp: 'WhatsApp', imessage: 'iMessage', tiktok: 'TikTok', tiktoklive: 'TikTok'
+    imessage: 'iMessage', tiktok: 'TikTok', tiktoklive: 'TikTok'
   };
 
   function brandName(project) {

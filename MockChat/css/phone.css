@@ -327,14 +327,6 @@
   --kb-bg: #1b1b1d; --kb-key: #6b6b70; --kb-key-sp: #434347;
   --kb-text: #ffffff; --kb-press: #8a8a90; --kb-shadow: rgba(0,0,0,.55); --kb-divider: rgba(255,255,255,.18);
 }
-.phone[data-platform="whatsapp"][data-theme="light"] .kb {
-  --kb-bg: #f1f3f4; --kb-key: #dfe1e5; --kb-key-sp: #dadce0;
-  --kb-text: #202124; --kb-press: #c9ccd1; --kb-shadow: transparent; --kb-divider: rgba(0,0,0,.14);
-}
-.phone[data-platform="whatsapp"][data-theme="dark"] .kb {
-  --kb-bg: #202124; --kb-key: #3c4043; --kb-key-sp: #303134;
-  --kb-text: #e8eaed; --kb-press: #5f6368; --kb-shadow: transparent; --kb-divider: rgba(255,255,255,.14);
-}
 
 .home-indicator {
   flex: 0 0 auto; height: 20px;

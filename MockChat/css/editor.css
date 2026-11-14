@@ -185,7 +185,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .seg.full { display: flex; width: 100%; }
 .seg.full .d-tab { flex: 1 1 0; }
 /* the chosen platform wears its own pastel */
-#platformSeg .d-tab.d-tab-active[data-platform="whatsapp"]   { --d-tab-bg: var(--color-success); color: var(--color-success-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="imessage"]   { --d-tab-bg: var(--color-info);    color: var(--color-info-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="tiktok"]     { --d-tab-bg: var(--color-accent);  color: var(--color-accent-content); }
 #platformSeg .d-tab.d-tab-active[data-platform="tiktoklive"] { --d-tab-bg: var(--color-error);   color: var(--color-error-content); }

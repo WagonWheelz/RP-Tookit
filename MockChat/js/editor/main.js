@@ -57,7 +57,6 @@
       const on = b.dataset.platform === p.platform;
       b.classList.toggle('on', on);
       b.classList.toggle('d-tab-active', on);
-      b.classList.toggle('wa', on && p.platform === 'whatsapp');
       b.classList.toggle('plat-tt', on && S.isTT(p.platform));
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });

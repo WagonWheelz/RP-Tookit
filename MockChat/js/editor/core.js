@@ -17,7 +17,7 @@
   const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
   const esc = R.esc;
 
-  const project = S.defaultProject('whatsapp');
+  const project = S.defaultProject('imessage');
 
   const E = window.Ed = {
     S, R, T: window.Timeline, $, $$, esc,

@@ -455,7 +455,6 @@
 .tt-watermark .wm-logo .fitimg { width: 100%; height: 100%; }
 
 /* the chat platforms can carry a watermark too */
-.phone[data-platform="whatsapp"] .tt-watermark,
 .phone[data-platform="imessage"] .tt-watermark { color: var(--text-in); text-shadow: none; }
 
 /* draggable only inside the editor's preview — never in an export */
