@@ -884,10 +884,22 @@
   function migrate(data) {
     // outside data: the guard, then media reduced to names (core/mediaref.js)
     data = window.MediaRef.ingest(clean(data || {}));
-    // an unknown platform or theme has no palette and stops the editor dead
-    const platform = PRESETS[data.platform] ? data.platform : 'imessage';
+    // an unknown platform or theme has no palette and stops the editor dead.
+    // A page platform whose script is parked (commented out of index.html) has
+    // a preset but no chassis, so a project saved while it was live opens as a
+    // chat instead of a blank stage.
+    const parkedPage = (data.platform === 'youtube' && !window.YouTubeUI)
+      || (data.platform === 'pornhub' && !window.PHUI);
+    const platform = (PRESETS[data.platform] && !parkedPage) ? data.platform : 'imessage';
     data.platform = platform;
     if (data.theme != null && !PRESETS[platform][data.theme]) delete data.theme;
+    if (parkedPage) {
+      // its canvas was desktop-sized; bring it back to a phone so it reads as a chat
+      const def = defaultChat(platform);
+      const fix = (c) => { if (!c) return; c.width = def.width; c.height = def.height; c.device = def.device; };
+      fix(data.chat);
+      (Array.isArray(data.scenes) ? data.scenes : []).forEach(sc => fix(sc && sc.chat));
+    }
     const base = defaultProject(platform);
     const proj = Object.assign({}, base, data);
     proj.meta = Object.assign({}, base.meta, data.meta || {});
