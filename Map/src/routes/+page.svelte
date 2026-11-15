@@ -9,7 +9,7 @@
   });
 </script>
 
-<a class="back" href="/index.html">&larr; Back to toolkit</a>
+<a class="back" href="../../index.html">&larr; Back to toolkit</a>
 <section id="map"
     bind:this={mapNode}/>
 

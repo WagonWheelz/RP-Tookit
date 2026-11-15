@@ -12,7 +12,7 @@ export default {
       strict: true,
     }),
     paths: {
-      base: '/Map/build',
+      base: '/RP-Tookit/Map/build',
     },
   },
 };
